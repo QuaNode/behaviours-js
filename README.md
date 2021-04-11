@@ -10,7 +10,7 @@ npm install behaviours
 ## Usage
 
 ```js
-var ( BehaviourConstructor, ModelEntity, QueryExpression, ComparisonOperators } = require('behaviours');
+var ( BusinessController, BehaviourConstructor, ModelEntity, QueryExpression, ComparisonOperators } = require('behaviours');
 var define = require('define-js');
 
 // 1: define data controller
