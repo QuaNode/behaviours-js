@@ -1,0 +1,34 @@
+{
+    "name": "behaviours",
+    "version": "1.0.0",
+    "description": "Behaviours framework written in JavaScript implementing Behaviour-first-design and map-queue architecture.",
+    "main": "index.js",
+    "scripts": {
+        "test": "test",
+        "snyk-protect": "snyk protect",
+        "prepare": "npm run snyk-protect"
+    },
+    "dependencies": {
+        "debug": "latest",
+        "define-js": "latest",
+        "parseparams": "latest",
+        "shallow-copy": "latest",
+        "snyk": "^1.192.6"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/quanode/behaviours.git"
+    },
+    "keywords": [
+        "behaviour",
+        "map",
+        "queue"
+    ],
+    "author": "Ahmed Ragab <ahmed.ragab@me.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/quanode/behaviours/issues"
+    },
+    "homepage": "https://github.com/quanode/behaviours#readme",
+    "snyk": true
+}
