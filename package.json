@@ -1,5 +1,5 @@
 {
-    "name": "behaviours",
+    "name": "behaviours-js",
     "version": "1.0.0",
     "description": "Behaviours framework written in JavaScript implementing Behaviour-first-design and queue-map architecture.",
     "main": "index.js",
