@@ -51,7 +51,6 @@ var Entity = define(function (init) {
     attributes: Schema
 });
 ModelEntity.registerModelEntity({
-
     entity: Entity,
     entityName: 'entity name'
 });
