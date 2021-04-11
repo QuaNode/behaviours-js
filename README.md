@@ -1,10 +1,10 @@
-# behaviours
+# behaviours-js
 Behaviours framework written in JavaScript implementing [Behaviour-first-design](https://github.com/ahmedragab/Behaviour-first-design/wiki) and queue-map architecture.
 
 ## Installation
 
 ```
-npm install behaviours
+npm install behaviours-js
 ```
 
 ## Usage
