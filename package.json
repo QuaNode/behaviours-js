@@ -1,10 +1,10 @@
 {
     "name": "behaviours",
     "version": "1.0.0",
-    "description": "Behaviours framework written in JavaScript implementing Behaviour-first-design and map-queue architecture.",
+    "description": "Behaviours framework written in JavaScript implementing Behaviour-first-design and queue-map architecture.",
     "main": "index.js",
     "scripts": {
-        "test": "test",
+        "test": "snyk test && test",
         "snyk-protect": "snyk protect",
         "prepare": "npm run snyk-protect"
     },
