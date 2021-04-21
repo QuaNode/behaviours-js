@@ -19,9 +19,9 @@ var BusinessController = function (options) {
     var getModelMethods = options.getModelMethods;
     var serviceController = options.serviceController;
     var getServiceMethods = options.getServiceMethods;
-    var cacheController = options.cacheController;
+    var resourceController = options.resourceController;
     var fetchMethod = options.fetchMethod;
-    var FetchBehaviour = options.FetchBehaviour;
+    var FetchBehaviour = self.FetchBehaviour = options.FetchBehaviour;
     var serviceOperations =
         BusinessBehaviourCycle.validateServiceOperations(options.serviceOperations);
     var modelOperations = BusinessBehaviourCycle.validateModelOperations(options.modelOperations);
@@ -43,7 +43,7 @@ var BusinessController = function (options) {
         serviceController: serviceController,
         getServiceMethods: getServiceMethods,
         serviceOperations: serviceOperations,
-        cacheController: cacheController,
+        resourceController: resourceController,
         fetchMethod: fetchMethod,
         FetchBehaviour: FetchBehaviour
     });
@@ -72,7 +72,7 @@ var BusinessController = function (options) {
     });
     self.modelController = modelController;
     self.serviceController = serviceController;
-    self.cacheController = cacheController;
+    self.resourceController = resourceController;
     self.getQueueLength = function () {
 
         return businessBehaviourQueue.length();

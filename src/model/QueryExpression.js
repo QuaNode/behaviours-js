@@ -54,11 +54,13 @@ var QueryExpression = function (options) {
     var logicalOperator = options.logicalOperator;
     if (!isValidOperator(ComparisonOperators, comparisonOperator)) {
 
-        throw new Error('The comparison operator is not one of the allowed comparison operators, please use ComparisonOperators');
+        throw new Error('The comparison operator is not one of the allowed comparison operators, ' +
+            'please use ComparisonOperators');
     }
     if (logicalOperator && !isValidOperator(LogicalOperators, logicalOperator)) {
 
-        throw new Error('The logical operator is not one of the allowed logical operators, please use LogicalOperators');
+        throw new Error('The logical operator is not one of the allowed logical operators, ' +
+            'please use LogicalOperators');
     }
     var self = this;
     self.fieldName = options.fieldName;

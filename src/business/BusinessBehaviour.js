@@ -15,7 +15,7 @@ var BusinessBehaviourType = {
     OFFLINEACTION: 3
 };
 
-module.exports.BusinessBehaviour = define(function (init) {
+var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init) {
 
     return function (options) {
 
@@ -86,19 +86,19 @@ module.exports.BusinessBehaviour = define(function (init) {
             return businessBehaviourExt.beginBusinessOperation.apply(self, arguments);
         };
     };
-}).extend(BusinessLanguage).parameters({});
+}).extend(BusinessLanguage).defaults({});
 
-module.exports.BusinessBehaviour.prototype.hasMandatoryBehaviour = function (behaviour) {
+BusinessBehaviour.prototype.hasMandatoryBehaviour = function (behaviour) {
 
     var self = this;
     if (behaviour && self.mandatoryBehaviour === behaviour) return true;
-    else if (self.mandatoryBehaviour instanceof module.exports.BusinessBehaviour) {
+    else if (self.mandatoryBehaviour instanceof BusinessBehaviour) {
 
         return self.mandatoryBehaviour.hasMandatoryBehaviour(behaviour);
     } else return false;
 };
 
-module.exports.BusinessBehaviour.prototype.isEqualToBehaviour = function (behaviour) {
+BusinessBehaviour.prototype.isEqualToBehaviour = function (behaviour) {
 
     return this === behaviour;
 };

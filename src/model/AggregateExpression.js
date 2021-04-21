@@ -41,13 +41,15 @@ var AggregateExpression = function (options) {
         if (typeof computationOperator === 'function' && !isValidOperator(ComputationOperators,
             computationOperator)) {
 
-            throw new Error('The computation operator is not one of the allowed computation operators, please use ComputationOperators');
+            throw new Error('The computation operator is not one of the allowed computation ' +
+                'operators, please use ComputationOperators');
         }
     });
     var self = this;
     self.fieldName = options.fieldName;
     self.fieldValue = fieldValue;
-    self.contextualLevels = (Array.isArray(options.contextualLevels) && options.contextualLevels) || [];
+    self.contextualLevels =
+        (Array.isArray(options.contextualLevels) && options.contextualLevels) || [];
     self.computationOrder = options.computationOrder || 0;
 };
 

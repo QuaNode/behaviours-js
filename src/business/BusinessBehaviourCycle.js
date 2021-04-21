@@ -13,6 +13,7 @@ var BusinessOperation = {
 var ServiceOperation = {
 
     AUTHENTICATION: 'Authentication',
+    FETCH: 'Fetch',
     REQUEST: 'Request'
 };
 

@@ -1,4 +1,5 @@
 # behaviours-js
+
 Behaviours framework written in JavaScript implementing [Behaviour-first-design](https://github.com/ahmedragab/Behaviour-first-design/wiki) and queue-map architecture.
 
 ## Installation
@@ -10,7 +11,7 @@ npm install behaviours-js
 ## Usage
 
 ```js
-var ( BusinessController, BehaviourConstructor, ModelEntity, QueryExpression, ComparisonOperators } = require('behaviours');
+var ( BusinessController, BehaviourConstructor, ModelEntity, QueryExpression, ComparisonOperators } = require('behaviours-js');
 var define = require('define-js');
 
 // 1: define data controller
@@ -46,7 +47,7 @@ var Entity = define(function (init) {
             attributes: Schema
         }]).self();
     };
-}).extend(ModelEntity).parameters({
+}).extend(ModelEntity).defaults({
     constructor: EntityConstructor,
     attributes: Schema
 });
@@ -84,7 +85,7 @@ var MyBehaviour = define(function (init) {
             }).apply();
         });
     };
-}).extend(BehaviourConstructor).parameters({
+}).extend(BehaviourConstructor).defaults({
     type: 1
 });
 var behaviour = new MyBehaviour({
@@ -110,10 +111,9 @@ var businessController = new BusinessController({
 var cancel = businessController.runBehaviour(behaviour, function (property, superProperty) {
   // data mapping logic for output
 }, function(output, error) {
-  // the output / the goal of behaviour 
+  // the output / the goal of behaviour
 );
 
 // call cancel() to cancel execution
 
 ```
-

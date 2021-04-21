@@ -67,7 +67,9 @@ var getServiceOperation = function (operationDelegateApp, serviceOperation, dele
                 [serviceOperation, delegate, parameters, service, callback, append]);
         },
         parameters: getOperationFunc('parameters'),
+        resource: getOperationFunc('parameters'),
         service: getOperationFunc('service'),
+        stream: getOperationFunc('service'),
         append: getOperationFunc('append'),
         callback: getOperationFunc('callback'),
         cancel: getOperationCancelFunc(delegate)

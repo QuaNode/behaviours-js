@@ -125,11 +125,15 @@ var BusinessControllerExt = function (options) {
     var operationCallback = options.operationCallback;
     self.serviceDelegate = function (currentBehaviour, serviceOperation, callback) {
 
+        if (serviceOperation.toUpperCase() == OperationType.FETCH.toUpperCase() &&
+            (!FetchBehaviour || !(currentBehaviour instanceof FetchBehaviour)))
+            throw new Error('Missing or invalid fetch behaviour');
         var fetchCallback = getFetchCallback(currentBehaviour, operationCallback, callback);
         var requestCallback =
             getRequestCallback(currentBehaviour, serviceOperation, operationCallback, callback);
+        var fetchCancelCallback = getFetchCancelCallback(currentBehaviour);
         return FetchBehaviour && currentBehaviour instanceof FetchBehaviour ?
-            serviceOperationDelegate.fetch(fetchCallback, getFetchCancelCallback(currentBehaviour)) :
+            serviceOperationDelegate.fetch(fetchCallback, fetchCancelCallback) :
             serviceOperationDelegate.request(serviceOperation, requestCallback);
     };
     self.modelDelegate = function (currentBehaviour, modelOperation, callback) {
