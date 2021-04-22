@@ -11,10 +11,16 @@ npm install behaviours-js
 ## Usage
 
 ```js
-var ( BusinessController, BehaviourConstructor, ModelEntity, QueryExpression, ComparisonOperators } = require('behaviours-js');
+var ( BusinessController, BehaviourConstructor, ModelEntity, QueryExpression } = require('behaviours-js');
 var define = require('define-js');
 
 // 1: define data controller
+var ComparisonOperators = {
+    EQUAL: '=',
+    NE: '$ne'
+};
+backend.setComparisonOperators(ComparisonOperators);
+backend.setLogicalOperators(LogicalOperators);
 var ModelController = function () {
     self.removeObjects = function (queryExprs, entity, callback) {
         // do remove
