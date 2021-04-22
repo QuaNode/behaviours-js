@@ -20,7 +20,6 @@ var ComparisonOperators = {
     NE: '$ne'
 };
 backend.setComparisonOperators(ComparisonOperators);
-backend.setLogicalOperators(LogicalOperators);
 var ModelController = function () {
     self.removeObjects = function (queryExprs, entity, callback) {
         // do remove
