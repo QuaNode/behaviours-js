@@ -27,7 +27,7 @@ var ModelOperation = {
 var validateServiceOperations = function (serviceOperations) {
 
     return (Array.isArray(serviceOperations) && serviceOperations) ||
-        [ServiceOperation.REQUEST, ServiceOperation.AUTHENTICATION];
+        [ServiceOperation.REQUEST, ServiceOperation.FETCH, ServiceOperation.AUTHENTICATION];
 };
 
 var validateModelOperations = function (modelOperations) {
