@@ -47,10 +47,13 @@ var getFetchDelegate = function (fetchMethod, setCancel, callback) {
         if (typeof self.resourceController[fetchMethod] !== 'function')
             throw new Error('Invalid fetch method');
         var resource = null;
-        var fetchHandler = function (finished, error) {
+        var fetchHandler = function (updated_resource, error) {
 
-            if (typeof setResourceInfo === 'function') setResourceInfo(resource, error);
-            callback(finished && resource, error);
+            if (typeof setResourceInfo === 'function' &&
+                setResourceInfo(resource, error) && updated_resource) {
+
+                callback(updated_resource, error);
+            } else callback(null, error);
         };
         var stream = (typeof getStream === 'function' && getStream()) || undefined;
         if (typeof getResourceInfo === 'function') {
