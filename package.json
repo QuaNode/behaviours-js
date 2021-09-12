@@ -1,6 +1,6 @@
 {
     "name": "behaviours-js",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Behaviours framework written in JavaScript implementing Behaviour-first-design and queue-map architecture.",
     "main": "index.js",
     "scripts": {
