@@ -2,6 +2,7 @@
 /*jshint esversion: 6 */
 'use strict';
 
+var OperationType = require('./BusinessBehaviourCycle.js').OperationType;
 var ServiceController = require('../service/ServiceController.js').ServiceController;
 
 var getRequestDelegate = function (serviceOperation, serviceOperations, serviceMethods, callback) {
@@ -9,6 +10,8 @@ var getRequestDelegate = function (serviceOperation, serviceOperations, serviceM
     var self = this;
     return function (getServiceParameters, getEndPoint, setServiceObjects) {
 
+        if (serviceOperation.toUpperCase() == OperationType.FETCH.toUpperCase())
+            throw new Error('Missing or invalid fetch behaviour');
         if (!self.serviceController) throw new Error('No service controller for online behaviour');
         for (var t = 0; t < serviceOperations.length; t++) {
 

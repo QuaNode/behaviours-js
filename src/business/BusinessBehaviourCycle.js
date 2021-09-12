@@ -24,6 +24,16 @@ var ModelOperation = {
     INSERT: 'Insert'
 };
 
+var OperationType = {
+
+    FETCH: 'fetch',
+    REQUEST: 'request',
+    MANIPULATE: 'manipulate',
+    MAPFROM: 'mapfrom',
+    MAPTO: 'mapto',
+    MAPBETWEEN: 'mapbetween'
+};
+
 var validateServiceOperations = function (serviceOperations) {
 
     return (Array.isArray(serviceOperations) && serviceOperations) ||
@@ -203,3 +213,5 @@ module.exports.BusinessBehaviourCycle = BusinessBehaviourCycle;
 module.exports.BusinessOperation = BusinessOperation;
 
 module.exports.ServiceOperation = ServiceOperation;
+
+module.exports.OperationType = OperationType;

@@ -4,16 +4,7 @@
 
 var BehaviourTypes = require('./BusinessBehaviour.js').BusinessBehaviourType;
 var BusinessOperation = require('./BusinessBehaviourCycle.js').BusinessOperation;
-
-var OperationType = {
-
-    FETCH: 'fetch',
-    REQUEST: 'request',
-    MANIPULATE: 'manipulate',
-    MAPFROM: 'mapfrom',
-    MAPTO: 'mapto',
-    MAPBETWEEN: 'mapbetween'
-};
+var OperationType = require('./BusinessBehaviourCycle.js').OperationType;
 
 var getFetchCallback = function (currentBehaviour, operationCallback, callback) {
 
@@ -125,9 +116,6 @@ var BusinessControllerExt = function (options) {
     var operationCallback = options.operationCallback;
     self.serviceDelegate = function (currentBehaviour, serviceOperation, callback) {
 
-        if (serviceOperation.toUpperCase() == OperationType.FETCH.toUpperCase() &&
-            (!FetchBehaviour || !(currentBehaviour instanceof FetchBehaviour)))
-            throw new Error('Missing or invalid fetch behaviour');
         var fetchCallback = getFetchCallback(currentBehaviour, operationCallback, callback);
         var requestCallback =
             getRequestCallback(currentBehaviour, serviceOperation, operationCallback, callback);
