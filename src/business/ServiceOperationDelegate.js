@@ -13,9 +13,9 @@ var getRequestDelegate = function (serviceOperation, serviceOperations, serviceM
         if (serviceOperation.toUpperCase() == OperationType.FETCH.toUpperCase())
             throw new Error('Missing or invalid fetch behaviour');
         if (!self.serviceController) throw new Error('No service controller for online behaviour');
-        for (var t = 0; t < serviceOperations.length; t++) {
+        for (var i = 0; i < serviceOperations.length; i++) {
 
-            if (typeof self.serviceController[serviceMethods[serviceOperations[t]]] !== 'function')
+            if (typeof self.serviceController[serviceMethods[serviceOperations[i]]] !== 'function')
                 throw new Error('Invalid service method');
         }
         var requestHandler = function (serviceObjects, error) {
@@ -114,10 +114,10 @@ var ServiceOperationDelegate = function (options) {
     if (serviceController) {
 
         if (typeof getServiceMethods !== 'function' || !(Array.isArray(getServiceMethods())) ||
-            getServiceMethods().length !== 2) throw new Error('Invalid service methods');
-        for (var t = 0; t < serviceOperations.length; t++) {
+            getServiceMethods().length < 2) throw new Error('Invalid service methods');
+        for (var i = 0; i < serviceOperations.length; i++) {
 
-            serviceMethods[serviceOperations[t]] = getServiceMethods(t, serviceOperations[t]);
+            serviceMethods[serviceOperations[i]] = getServiceMethods(i, serviceOperations[i]);
         }
     }
     if (resourceController) {

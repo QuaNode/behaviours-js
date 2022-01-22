@@ -2,7 +2,7 @@
 /*jshint esversion: 6 */
 'use strict';
 
-var OperationDelegateApp = require('./OperationDelegateApp.js').OperationDelegateApp;
+var OperationDelegateExecutive = require('./OperationDelegateExecutive.js').OperationDelegateExecutive;
 var BusinessOperation = require('./BusinessBehaviourCycle.js').BusinessOperation;
 var parse = require('parseparams');
 
@@ -50,7 +50,7 @@ var getOperationCancelFunc = function (delegate) {
     };
 };
 
-var getServiceOperation = function (operationDelegateApp, serviceOperation, delegate) {
+var getServiceOperation = function (operationDelegateExecutive, serviceOperation, delegate) {
 
     return {
 
@@ -63,7 +63,7 @@ var getServiceOperation = function (operationDelegateApp, serviceOperation, dele
         },
         apply: function (parameters, service, callback, append) {
 
-            operationDelegateApp.serviceApply.apply(this,
+            operationDelegateExecutive.executeServiceOperation.apply(this,
                 [serviceOperation, delegate, parameters, service, callback, append]);
         },
         parameters: getOperationFunc('parameters'),
@@ -76,7 +76,7 @@ var getServiceOperation = function (operationDelegateApp, serviceOperation, dele
     };
 };
 
-var getModelOperation = function (operationDelegateApp, modelOperation, delegate) {
+var getModelOperation = function (operationDelegateExecutive, modelOperation, delegate) {
 
     return {
 
@@ -92,7 +92,7 @@ var getModelOperation = function (operationDelegateApp, modelOperation, delegate
         },
         apply: function (queryOrObjects, entity, callback, append) {
 
-            operationDelegateApp.modelApply.apply(this,
+            operationDelegateExecutive.executeModelOperation.apply(this,
                 [modelOperation, delegate, queryOrObjects, entity, callback, append]);
         },
         objects: getOperationFunc('objects'),
@@ -106,7 +106,7 @@ var getModelOperation = function (operationDelegateApp, modelOperation, delegate
     };
 };
 
-var getServiceMappingOperation = function (operationDelegateApp, businessOperation, delegate) {
+var getServiceMappingOperation = function (operationDelegateExecutive, businessOperation, delegate) {
 
     return {
 
@@ -116,7 +116,7 @@ var getServiceMappingOperation = function (operationDelegateApp, businessOperati
         },
         apply: function (callback) {
 
-            operationDelegateApp.serviceInputMappingApply.apply(this,
+            operationDelegateExecutive.executeServiceMappingOperation.apply(this,
                 [businessOperation, delegate, callback]);
         },
         callback: getOperationFunc('callback'),
@@ -124,7 +124,7 @@ var getServiceMappingOperation = function (operationDelegateApp, businessOperati
     };
 };
 
-var getModelMappingOperation = function (operationDelegateApp, businessOperation, delegate) {
+var getModelMappingOperation = function (operationDelegateExecutive, businessOperation, delegate) {
 
     return {
 
@@ -135,7 +135,7 @@ var getModelMappingOperation = function (operationDelegateApp, businessOperation
         },
         apply: function (identifiers, callback) {
 
-            operationDelegateApp.modelOutputMappingApply.apply(this,
+            operationDelegateExecutive.executeModelMappingOperation.apply(this,
                 [businessOperation, delegate, identifiers, callback]);
         },
         identifiers: getOperationFunc('identifiers'),
@@ -144,7 +144,7 @@ var getModelMappingOperation = function (operationDelegateApp, businessOperation
     };
 };
 
-var getErrorHandlingOperation = function (operationDelegateApp, businessOperation, delegate) {
+var getErrorHandlingOperation = function (operationDelegateExecutive, businessOperation, delegate) {
 
     return {
 
@@ -154,14 +154,15 @@ var getErrorHandlingOperation = function (operationDelegateApp, businessOperatio
         },
         apply: function (error) {
 
-            operationDelegateApp.errorHandlingApply.apply(this, [businessOperation, delegate, error]);
+            operationDelegateExecutive.executeErrorHandlingOperation.apply(this,
+                [businessOperation, delegate, error]);
         },
         error: getOperationFunc('error'),
         cancel: getOperationCancelFunc(delegate)
     };
 };
 
-var BusinessBehaviourExt = function (options) {
+var BusinessBehaviourCore = function (options) {
 
     var self = this;
     var middlewares = options.middlewares;
@@ -169,37 +170,37 @@ var BusinessBehaviourExt = function (options) {
     var watchers = options.watchers;
     var useConditions = options.useConditions;
     var beginConditions = options.beginConditions;
-    var operationDelegateApp = new OperationDelegateApp({
+    var operationDelegateExecutive = new OperationDelegateExecutive({
 
         watchers: watchers
     });
     self.beginServiceOperation = function (serviceOperation, businessController, delegate) {
 
-        var delegateExisted = delegates[serviceOperation] && true;
+        var delegateExisted = !!delegates[serviceOperation];
         middleware(serviceOperation, businessController, 0, function () {
 
             if (delegateExisted && ifCondition(serviceOperation, beginConditions))
                 delegates[serviceOperation](serviceOperation, businessController,
-                    getServiceOperation(operationDelegateApp, serviceOperation, delegate));
+                    getServiceOperation(operationDelegateExecutive, serviceOperation, delegate));
             else if (delegateExisted) delegate();
         }, middlewares, useConditions);
         return delegateExisted;
     };
     self.beginModelOperation = function (modelOperation, businessController, delegate) {
 
-        var delegateExisted = delegates[modelOperation] && true;
+        var delegateExisted = !!delegates[modelOperation];
         middleware(modelOperation, businessController, 0, function () {
 
             if (delegateExisted && ifCondition(modelOperation, beginConditions))
                 delegates[modelOperation](modelOperation, businessController,
-                    getModelOperation(operationDelegateApp, modelOperation, delegate));
+                    getModelOperation(operationDelegateExecutive, modelOperation, delegate));
             else if (delegateExisted) delegate();
         }, middlewares, useConditions);
         return delegateExisted;
     };
     self.beginBusinessOperation = function (businessOperation, businessController, delegate) {
 
-        var delegateExisted = delegates[businessOperation] && true;
+        var delegateExisted = !!delegates[businessOperation];
         middleware(businessOperation, businessController, 0, function () {
 
             if (delegateExisted && ifCondition(businessOperation, beginConditions)) {
@@ -208,17 +209,17 @@ var BusinessBehaviourExt = function (options) {
 
                     case BusinessOperation.SERVICEOBJECTMAPPING:
                         delegates[businessOperation](businessOperation, businessController,
-                            getServiceMappingOperation(operationDelegateApp,
+                            getServiceMappingOperation(operationDelegateExecutive,
                                 businessOperation, delegate));
                         break;
                     case BusinessOperation.MODELOBJECTMAPPING:
                         delegates[businessOperation](businessOperation, businessController,
-                            getModelMappingOperation(operationDelegateApp,
+                            getModelMappingOperation(operationDelegateExecutive,
                                 businessOperation, delegate));
                         break;
                     case BusinessOperation.ERRORHANDLING:
                         delegates[businessOperation](businessOperation, businessController,
-                            getErrorHandlingOperation(operationDelegateApp,
+                            getErrorHandlingOperation(operationDelegateExecutive,
                                 businessOperation, delegate));
                         break;
                 }
@@ -228,4 +229,4 @@ var BusinessBehaviourExt = function (options) {
     };
 };
 
-module.exports.BusinessBehaviourExt = BusinessBehaviourExt;
+module.exports.BusinessBehaviourCore = BusinessBehaviourCore;

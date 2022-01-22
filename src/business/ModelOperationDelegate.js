@@ -7,9 +7,9 @@ var getManipulateDelegate = function (modelOperation, modelOperations, modelMeth
     return function (getObjWrapperOrObjAttributes, getModelEntity, setModelObjects) {
 
         if (!self.modelController) throw new Error('No model controller for offline behaviour');
-        for (var c = 0; c < modelOperations.length; c++) {
+        for (var i = 0; i < modelOperations.length; i++) {
 
-            if (typeof self.modelController[modelMethods[modelOperations[c]]] !== 'function')
+            if (typeof self.modelController[modelMethods[modelOperations[i]]] !== 'function')
                 throw new Error('Invalid model method');
         }
         var modelCallback = function (modelObjects, error) {
@@ -47,11 +47,11 @@ var ModelOperationDelegate = function (options) {
     if (modelController) {
 
         if (typeof getModelMethods !== 'function' || !(Array.isArray(getModelMethods())) ||
-            getModelMethods().length !== 3) throw new Error('Invalid model methods');
-        for (var c = 0; c < modelOperations.length; c++) {
+            getModelMethods().length < 3) throw new Error('Invalid model methods');
+        for (var i = 0; i < modelOperations.length; i++) {
 
-            modelMethods[modelOperations[c]] = getModelMethods(c, modelOperations[c]);
-            if (typeof modelController[modelMethods[modelOperations[c]]] !== 'function')
+            modelMethods[modelOperations[i]] = getModelMethods(i, modelOperations[i]);
+            if (typeof modelController[modelMethods[modelOperations[i]]] !== 'function')
                 throw new Error('Invalid model method');
         }
     }

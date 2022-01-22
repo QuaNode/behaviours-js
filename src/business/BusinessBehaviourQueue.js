@@ -37,7 +37,7 @@ var getCompletionObject = function (completionDelegate) {
         },
         apply: function (success, dependentBehaviours) {
 
-            this.data.success = (typeof success === 'boolean' && success) || this.data.success;
+            this.data.success = typeof success === 'boolean' ? success : this.data.success;
             this.data.dependentBehaviours = dependentBehaviours || this.data.dependentBehaviours;
             completionDelegate(function () {
 

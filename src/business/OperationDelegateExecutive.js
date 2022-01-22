@@ -108,22 +108,22 @@ var getErrorHandlingContinue = function (delegate) {
     };
 };
 
-var OperationDelegateApp = function (options) {
+var OperationDelegateExecutive = function (options) {
 
     var self = this;
     var watchers = options.watchers;
-    self.serviceApply = function (serviceOperation, delegate, parameters, service, callback, append) {
+    self.executeServiceOperation = function (serviceOperation, delegate, parameters, service, callback, append) {
 
         var that = this;
         that.data.parameters = parameters || that.data.parameters;
         that.data.service = service || that.data.service;
         that.data.callback = callback || that.data.callback;
         that.data.append = typeof parameters === 'boolean' ? parameters :
-            ((typeof append === 'boolean' && append) || that.data.append);
+            typeof append === 'boolean' ? append : that.data.append;
         var serviceContinue = getServiceContinue.apply(that, [delegate]);
         watch(serviceOperation, that.data, 0, serviceContinue, watchers);
     };
-    self.modelApply = function (modelOperation, delegate, queryOrObjects, entity, callback, append) {
+    self.executeModelOperation = function (modelOperation, delegate, queryOrObjects, entity, callback, append) {
 
         var that = this;
         that.data.wrapper = that.data.objects || {
@@ -147,18 +147,18 @@ var OperationDelegateApp = function (options) {
         that.data.entity = entity || that.data.entity;
         that.data.callback = callback || that.data.callback;
         that.data.append = typeof queryOrObjects === 'boolean' ? queryOrObjects :
-            ((typeof append === 'boolean' && append) || that.data.append);
+            typeof append === 'boolean' ? append : that.data.append;
         var modelContinue = getModelContinue.apply(that, [delegate]);
         watch(modelOperation, that.data, 0, modelContinue, watchers);
     };
-    self.serviceInputMappingApply = function (businessOperation, delegate, callback) {
+    self.executeServiceMappingOperation = function (businessOperation, delegate, callback) {
 
         var that = this;
         that.data.callback = callback || that.data.callback;
         var serviceMappingContinue = getServiceMappingContinue.apply(that, [delegate]);
         watch(businessOperation, that.data, 0, serviceMappingContinue, watchers);
     };
-    self.modelOutputMappingApply = function (businessOperation, delegate, identifiers, callback) {
+    self.executeModelMappingOperation = function (businessOperation, delegate, identifiers, callback) {
 
         var that = this;
         that.data.identifiers = identifiers || that.data.identifiers;
@@ -166,7 +166,7 @@ var OperationDelegateApp = function (options) {
         var modelMappingContinue = getModelMappingContinue.apply(that, [delegate]);
         watch(businessOperation, that.data, 0, modelMappingContinue, watchers);
     };
-    self.errorHandlingApply = function (businessOperation, delegate, error) {
+    self.executeErrorHandlingOperation = function (businessOperation, delegate, error) {
 
         var that = this;
         that.data.error = error || that.data.error;
@@ -175,4 +175,4 @@ var OperationDelegateApp = function (options) {
     };
 };
 
-module.exports.OperationDelegateApp = OperationDelegateApp;
+module.exports.OperationDelegateExecutive = OperationDelegateExecutive;

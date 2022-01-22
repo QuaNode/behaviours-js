@@ -9,7 +9,7 @@ var ServiceOperationDelegate = require('./ServiceOperationDelegate.js').ServiceO
 var BusinessOperationDelegate = require('./BusinessOperationDelegate.js').BusinessOperationDelegate;
 var BusinessBehaviourQueue = require('./BusinessBehaviourQueue.js').BusinessBehaviourQueue;
 var BusinessBehaviourCycle = require('./BusinessBehaviourCycle.js').BusinessBehaviourCycle;
-var BusinessControllerExt = require('./BusinessControllerExt.js').BusinessControllerExt;
+var BusinessDelegator = require('./BusinessDelegator.js').BusinessDelegator;
 
 var BusinessController = function (options) {
 
@@ -50,7 +50,7 @@ var BusinessController = function (options) {
     var businessOperationDelegate = new BusinessOperationDelegate();
     var businessBehaviourQueue = new BusinessBehaviourQueue(BusinessBehaviourCycle.setComplete,
         BusinessBehaviourCycle.setError);
-    var businessControllerExt = new BusinessControllerExt({
+    var businessDelegator = new BusinessDelegator({
 
         modelOperationDelegate: modelOperationDelegate,
         serviceOperationDelegate: serviceOperationDelegate,
@@ -65,10 +65,10 @@ var BusinessController = function (options) {
         modelOperations: modelOperations,
         BusinessBehaviourTypes: BusinessBehaviourTypes,
         businessBehaviourQueue: businessBehaviourQueue,
-        serviceDelegate: businessControllerExt.serviceDelegate,
-        modelDelegate: businessControllerExt.modelDelegate,
-        serviceMappingDelegate: businessControllerExt.serviceMappingDelegate,
-        modelMappingDelegate: businessControllerExt.modelMappingDelegate
+        delegateServiceOperation: businessDelegator.delegateServiceOperation,
+        delegateModelOperation: businessDelegator.delegateModelOperation,
+        delegateServiceMappingOperation: businessDelegator.delegateServiceMappingOperation,
+        delegateModelMappingOperation: businessDelegator.delegateModelMappingOperation
     });
     self.modelController = modelController;
     self.serviceController = serviceController;
@@ -79,7 +79,7 @@ var BusinessController = function (options) {
     };
     self.forceCancelBehaviours = function () {
 
-        businessBehaviourQueue.cancelAll(businessControllerExt.cancelRunningBehaviour);
+        businessBehaviourQueue.cancelAll(businessDelegator.cancelRunningBehaviour);
     };
     self.ignoreBehaviours = function () {
 
@@ -104,7 +104,7 @@ var BusinessController = function (options) {
         return businessBehaviourQueue.enqueue(behaviour, function () {
 
             businessBehaviourCycle.runNextBehaviour();
-        }, businessControllerExt.cancelRunningBehaviour);
+        }, businessDelegator.cancelRunningBehaviour);
     };
 };
 

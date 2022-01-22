@@ -106,7 +106,7 @@ var getMappingCallback = function (currentBehaviour, operation, operationCallbac
     };
 };
 
-var BusinessControllerExt = function (options) {
+var BusinessDelegator = function (options) {
 
     var self = this;
     var modelOperationDelegate = options.modelOperationDelegate;
@@ -114,7 +114,7 @@ var BusinessControllerExt = function (options) {
     var businessOperationDelegate = options.businessOperationDelegate;
     var FetchBehaviour = options.FetchBehaviour;
     var operationCallback = options.operationCallback;
-    self.serviceDelegate = function (currentBehaviour, serviceOperation, callback) {
+    self.delegateServiceOperation = function (currentBehaviour, serviceOperation, callback) {
 
         var fetchCallback = getFetchCallback(currentBehaviour, operationCallback, callback);
         var requestCallback =
@@ -124,20 +124,20 @@ var BusinessControllerExt = function (options) {
             serviceOperationDelegate.fetch(fetchCallback, fetchCancelCallback) :
             serviceOperationDelegate.request(serviceOperation, requestCallback);
     };
-    self.modelDelegate = function (currentBehaviour, modelOperation, callback) {
+    self.delegateModelOperation = function (currentBehaviour, modelOperation, callback) {
 
         var manipulateCallback =
             getManipulateCallback(currentBehaviour, modelOperation, operationCallback, callback);
         return modelOperationDelegate.manipulate(modelOperation, manipulateCallback);
     };
-    self.serviceMappingDelegate = function (currentBehaviour, callback) {
+    self.delegateServiceMappingOperation = function (currentBehaviour, callback) {
 
         var isOnlineAction = currentBehaviour.getType() === BehaviourTypes.ONLINEACTION;
         var mapFromCallback = getMapFromCallback(currentBehaviour, operationCallback, callback);
         return businessOperationDelegate.mapFromObjects(currentBehaviour.inputObjects,
             currentBehaviour.getProperty, isOnlineAction, mapFromCallback);
     };
-    self.modelMappingDelegate = function (currentBehaviour, callback) {
+    self.delegateModelMappingOperation = function (currentBehaviour, callback) {
 
         var operation = null;
         switch (currentBehaviour.getType()) {
@@ -174,7 +174,7 @@ var BusinessControllerExt = function (options) {
     };
 };
 
-BusinessControllerExt.prototype.cancelRunningBehaviour = function (behaviour) {
+BusinessDelegator.prototype.cancelRunningBehaviour = function (behaviour) {
 
     if (typeof behaviour.cancel === 'function') {
 
@@ -183,4 +183,4 @@ BusinessControllerExt.prototype.cancelRunningBehaviour = function (behaviour) {
     }
 };
 
-module.exports.BusinessControllerExt = BusinessControllerExt;
+module.exports.BusinessDelegator = BusinessDelegator;

@@ -36,13 +36,13 @@ var OperationType = {
 
 var validateServiceOperations = function (serviceOperations) {
 
-    return (Array.isArray(serviceOperations) && serviceOperations) ||
+    return Array.isArray(serviceOperations) ? serviceOperations :
         [ServiceOperation.REQUEST, ServiceOperation.FETCH, ServiceOperation.AUTHENTICATION];
 };
 
 var validateModelOperations = function (modelOperations) {
 
-    return (Array.isArray(modelOperations) && modelOperations) ||
+    return Array.isArray(modelOperations) ? modelOperations :
         [ModelOperation.INSERT, ModelOperation.DELETE, ModelOperation.QUERY];
 };
 
@@ -86,15 +86,15 @@ var continueRunningBehaviour = function (currentBehaviour, options) {
     var self = this;
     var businessBehaviourQueue = options.businessBehaviourQueue;
     var businessController = options.businessController;
-    var modelDelegate = options.modelDelegate;
-    var modelMappingDelegate = options.modelMappingDelegate;
+    var delegateModelOperation = options.delegateModelOperation;
+    var delegateModelMappingOperation = options.delegateModelMappingOperation;
     ignoreBusinessOperation(currentBehaviour, BusinessOperation.SERVICEOBJECTMAPPING, true);
     if (businessBehaviourQueue.suspend(currentBehaviour)) return;
     var modelOperation = currentBehaviour.state.modelOperations.pop();
     if (modelOperation) {
 
         if (!currentBehaviour.beginModelOperation(modelOperation, businessController,
-            modelDelegate(currentBehaviour, modelOperation, function () {
+            delegateModelOperation(currentBehaviour, modelOperation, function () {
 
                 continueRunningBehaviour.apply(self, [currentBehaviour, options]);
             }))) continueRunningBehaviour.apply(self, [currentBehaviour, options]);
@@ -107,7 +107,7 @@ var continueRunningBehaviour = function (currentBehaviour, options) {
         };
         if (ignoreBusinessOperation(currentBehaviour, BusinessOperation.MODELOBJECTMAPPING, false) ||
             !currentBehaviour.beginBusinessOperation(BusinessOperation.MODELOBJECTMAPPING,
-                businessController, modelMappingDelegate(currentBehaviour, businessCallback))) {
+                businessController, delegateModelMappingOperation(currentBehaviour, businessCallback))) {
 
             businessCallback();
         }
@@ -119,14 +119,14 @@ var beginRunnigBehaviour = function (currentBehaviour, options) {
     var self = this;
     var businessBehaviourQueue = options.businessBehaviourQueue;
     var businessController = options.businessController;
-    var serviceDelegate = options.serviceDelegate;
-    var serviceMappingDelegate = options.serviceMappingDelegate;
+    var delegateServiceOperation = options.delegateServiceOperation;
+    var delegateServiceMappingOperation = options.delegateServiceMappingOperation;
     if (businessBehaviourQueue.suspend(currentBehaviour)) return;
     var serviceOperation = currentBehaviour.state.serviceOperations.pop();
     var businessCallback = function () {
 
         if (!currentBehaviour.beginServiceOperation(serviceOperation, businessController,
-            serviceDelegate(currentBehaviour, serviceOperation,
+            delegateServiceOperation(currentBehaviour, serviceOperation,
                 function () {
 
                     beginRunnigBehaviour.apply(self, [currentBehaviour, options]);
@@ -136,7 +136,7 @@ var beginRunnigBehaviour = function (currentBehaviour, options) {
 
         if (ignoreBusinessOperation(currentBehaviour, BusinessOperation.SERVICEOBJECTMAPPING, false) ||
             !currentBehaviour.beginBusinessOperation(BusinessOperation.SERVICEOBJECTMAPPING,
-                businessController, serviceMappingDelegate(currentBehaviour, businessCallback))) {
+                businessController, delegateServiceMappingOperation(currentBehaviour, businessCallback))) {
 
             businessCallback();
         }

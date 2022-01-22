@@ -3,7 +3,7 @@
 'use strict';
 
 var copy = require('shallow-copy');
-var BusinessBehaviourExt = require('./BusinessBehaviourExt.js').BusinessBehaviourExt;
+var BusinessBehaviourCore = require('./BusinessBehaviourCore.js').BusinessBehaviourCore;
 var BusinessLanguage = require('./BusinessLanguage.js').BusinessLanguage;
 var define = require('define-js');
 
@@ -29,7 +29,7 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
             beginConditions: {},
         };
         var self = init.apply(this, [languageParameters]).self();
-        var businessBehaviourExt = new BusinessBehaviourExt(languageParameters);
+        var businessBehaviourCore = new BusinessBehaviourCore(languageParameters);
         var type = null;
         self.priority = options.priority;
         self.name = options.name;
@@ -75,15 +75,15 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
         };
         self.beginServiceOperation = function (serviceOperation) {
 
-            return businessBehaviourExt.beginServiceOperation.apply(self, arguments);
+            return businessBehaviourCore.beginServiceOperation.apply(self, arguments);
         };
         self.beginModelOperation = function (modelOperation) {
 
-            return businessBehaviourExt.beginModelOperation.apply(self, arguments);
+            return businessBehaviourCore.beginModelOperation.apply(self, arguments);
         };
         self.beginBusinessOperation = function (businessOperation) {
 
-            return businessBehaviourExt.beginBusinessOperation.apply(self, arguments);
+            return businessBehaviourCore.beginBusinessOperation.apply(self, arguments);
         };
     };
 }).extend(BusinessLanguage).defaults({});

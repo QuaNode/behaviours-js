@@ -42,7 +42,7 @@ var getParsedValue = function (value, type) {
 
                     return (isValueString ? value.split(',') : value).map(function (subValue) {
 
-                        return (type[0] && getParsedValue(subValue, type[0])) || subValue;
+                        return type[0] ? getParsedValue(subValue, type[0]) : subValue;
                     });
                 }
             } else if (typeof type === 'object' && typeof value === 'object') {

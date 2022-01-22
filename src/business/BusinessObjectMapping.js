@@ -121,7 +121,6 @@ BusinessObjectMapping.prototype.forEachAttribute =
                 return isValidValue(subValue);
             })) return true;
             return !!(typeof value !== 'object' && typeof value !== 'function');
-
         };
         forEachProperty(rightObject, getProperty, function (property, getMappedProperty) {
 
@@ -145,9 +144,8 @@ BusinessObjectMapping.prototype.forEachRelation =
 
                 return true;
             }
-            return !!(typeof object === 'object' && !Array.isArray(object) &&
-                !(object instanceof Date) && typeof object !== 'function');
-
+            return typeof object === 'object' && !Array.isArray(object) &&
+                !(object instanceof Date) && typeof object !== 'function';
         };
         forEachProperty(rightObject, getProperty, function (property, getMappedProperty) {
 
@@ -161,8 +159,7 @@ BusinessObjectMapping.prototype.forEachRelation =
                 else if (typeof mappedProperty === 'object' &&
                     typeof mappedProperty.property === 'string')
                     return callback(property, mappedProperty.property, getSubProperty);
-                else
-                    return callback(property, mappedProperty, getSubProperty);
+                else return callback(property, mappedProperty, getSubProperty);
             }
         }, finạlly);
     };
