@@ -6,53 +6,60 @@ var ModelEntities = {};
 module.exports.ModelEntity = function (options) {
 
     var self = this;
-    var constructor = options.constructor;
-    var attributes = options.attributes;
-    var features = options.features;
-    var query = options.query;
-    var aggregate = options.aggregate;
-    if (typeof constructor !== 'function' || typeof attributes !== 'object' ||
-        (features !== undefined && typeof attributes !== 'object') ||
-        (aggregate !== undefined && !Array.isArray(aggregate)) ||
-        (query !== undefined && !Array.isArray(query)))
-        throw new Error('Invalid entity parameters');
-    self.getObjectConstructor = function () {
+    var {
+        constructor,
+        attributes,
+        features,
+        query,
+        aggregate
+    } = options;
+    var invalidOptions = typeof constructor !== 'function';
+    invalidOptions |= typeof attributes !== 'object';
+    if (features !== undefined) {
 
-        return constructor;
-    };
-    self.getObjectAttributes = function () {
+        invalidOptions |= typeof features !== 'object';
+    }
+    if (aggregate !== undefined) {
 
-        return attributes;
-    };
-    self.getObjectFeatures = function () {
+        invalidOptions |= !Array.isArray(aggregate);
+    }
+    if (query !== undefined) {
 
-        return features;
-    };
-    self.getObjectQuery = function () {
-
-        return query;
-    };
-    self.getObjectAggregate = function () {
-
-        return aggregate;
-    };
+        invalidOptions |= !Array.isArray(query);
+    }
+    if (invalidOptions) throw new Error('Invalid entity options');
+    self.getObjectConstructor = () => constructor;
+    self.getObjectAttributes = () => attributes;
+    self.getObjectFeatures = () => features;
+    self.getObjectQuery = () => query;
+    self.getObjectAggregate = () => aggregate;
 };
 
 module.exports.ModelEntity.registerModelEntity = function (options) {
 
-    var entity = options.entity;
-    var entityName = options.entityName;
+    var {
+        entity,
+        entityName
+    } = options;
     var validEntity = typeof entity === 'function';
-    var validEntityName = typeof entityName === 'string' && entityName.length > 0;
-    if (validEntityName && ModelEntities[entityName])
-        throw new Error('Entity with same name already registered: ' + entityName);
-    if (validEntity && validEntityName) ModelEntities[entityName] = entity;
+    var validName = typeof entityName === 'string';
+    if (validName) validName &= entityName.length > 0;
+    if (validName && ModelEntities[entityName]) {
+
+        throw new Error('Entity with same name already' +
+            ' registered: ' + entityName);
+    }
+    if (validEntity && validName) ModelEntities[entityName] = entity;
     else throw new Error('Invalid entity parameters');
 };
 
-module.exports.ModelEntity.createModelEntity = function (entityName, options) {
+module.exports.ModelEntity.createModelEntity = function () {
 
-    return ModelEntities[entityName] && new ModelEntities[entityName](options);
+    var [entityName, options] = arguments;
+    if (ModelEntities[entityName]) {
+
+        return new ModelEntities[entityName](options);
+    }
 };
 
 module.exports.ModelEntity.getModelEntity = function (entityName) {

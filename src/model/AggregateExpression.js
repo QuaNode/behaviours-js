@@ -30,27 +30,39 @@ var isValidOperator = function (object, value) {
 
 var AggregateExpression = function (options) {
 
+    var self = this;
     if (!ComputationOperators) {
 
-        throw new Error('Set computation operators before using aggregate expression');
+        throw new Error('Set computation operators before' +
+            ' using aggregate expression');
     }
-    var fieldValue = options.fieldValue;
-    if (!Array.isArray(fieldValue)) fieldValue = [fieldValue];
+    var {
+        fieldValue,
+        fieldName,
+        contextualLevels,
+        computationOrder
+    } = options;
+    var one = !Array.isArray(fieldValue);
+    if (one) fieldValue = [fieldValue];
     fieldValue.forEach(function (computationOperator) {
 
-        if (typeof computationOperator === 'function' && !isValidOperator(ComputationOperators,
-            computationOperator)) {
+        var func = typeof computationOperator === 'function';
+        if (func && !isValidOperator(...[
+            ComputationOperators,
+            computationOperator
+        ])) {
 
-            throw new Error('The computation operator is not one of the allowed computation ' +
-                'operators, please use ComputationOperators');
+            throw new Error('The computation operator is not ' +
+                'one of the allowed computation operators,' +
+                ' please use ComputationOperators');
         }
     });
-    var self = this;
-    self.fieldName = options.fieldName;
+    self.fieldName = fieldName;
     self.fieldValue = fieldValue;
-    self.contextualLevels =
-        (Array.isArray(options.contextualLevels) && options.contextualLevels) || [];
-    self.computationOrder = options.computationOrder || 0;
+    var many = Array.isArray(contextualLevels);
+    if (many) self.contextualLevels = contextualLevels;
+    else contextualLevels = [];
+    self.computationOrder = computationOrder || 0;
 };
 
 module.exports.AggregateExpression = AggregateExpression;

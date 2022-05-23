@@ -42,33 +42,48 @@ var isValidOperator = function (object, value) {
 
 var QueryExpression = function (options) {
 
+    var self = this;
     if (!ComparisonOperators) {
 
-        throw new Error('Set comparison operators before using query expression');
+        throw new Error('Set comparison operators before' +
+            ' using query expression');
     }
     if (!LogicalOperators) {
 
-        throw new Error('Set logical operators before using query expression');
+        throw new Error('Set logical operators before using' +
+            ' query expression');
     }
-    var comparisonOperator = options.comparisonOperator;
-    var logicalOperator = options.logicalOperator;
-    if (!isValidOperator(ComparisonOperators, comparisonOperator)) {
+    var {
+        comparisonOperator,
+        comparisonOperatorOptions,
+        logicalOperator,
+        fieldName,
+        contextualLevel
+    } = options;
+    if (!isValidOperator(...[
+        ComparisonOperators,
+        comparisonOperator
+    ])) {
 
-        throw new Error('The comparison operator is not one of the allowed comparison operators, ' +
-            'please use ComparisonOperators');
+        throw new Error('The comparison operator is not one of' +
+            ' the allowed comparison operators, please use' +
+            ' ComparisonOperators');
     }
-    if (logicalOperator && !isValidOperator(LogicalOperators, logicalOperator)) {
+    if (logicalOperator && !isValidOperator(...[
+        LogicalOperators,
+        logicalOperator
+    ])) {
 
-        throw new Error('The logical operator is not one of the allowed logical operators, ' +
-            'please use LogicalOperators');
+        throw new Error('The logical operator is not one of the' +
+            ' allowed logical operators, please use' +
+            ' LogicalOperators');
     }
-    var self = this;
-    self.fieldName = options.fieldName;
+    self.fieldName = fieldName;
     self.comparisonOperator = comparisonOperator;
-    self.comparisonOperatorOptions = options.comparisonOperatorOptions;
-    self.fieldValue = options.fieldValue;
+    self.comparisonOperatorOptions = comparisonOperatorOptions;
+    self.fieldValue = fieldValue;
     self.logicalOperator = logicalOperator;
-    self.contextualLevel = options.contextualLevel || 0;
+    self.contextualLevel = contextualLevel || 0;
 };
 
 module.exports.QueryExpression = QueryExpression;

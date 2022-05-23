@@ -2,18 +2,27 @@
 /*jshint esversion: 6 */
 'use strict';
 
-var BehaviourTypes = require('./BusinessBehaviour.js').BusinessBehaviourType;
-var BusinessOperation = require('./BusinessBehaviourCycle.js').BusinessOperation;
-var OperationType = require('./BusinessBehaviourCycle.js').OperationType;
+var { BusinessBehaviourType: BehaviourTypes } = require('./BusinessBehaviour.js');
+var { BusinessOperation } = require('./BusinessBehaviourCycle.js');
+var { OperationType } = require('./BusinessBehaviourCycle.js');
 
-var getFetchCallback = function (currentBehaviour, operationCallback, callback) {
+var getFetchCallback = function () {
 
+    var [
+        currentBehaviour,
+        operationCallback,
+        callback
+    ] = arguments;
     return function (resource, error) {
 
-        if (resource)
-            currentBehaviour.state.serviceObjects = [resource.data || resource.id || resource.path];
+        if (resource) currentBehaviour.state.serviceObjects = [
+            resource.data ||
+            resource.id ||
+            resource.path
+        ];
         if (error) currentBehaviour.state.error = error;
-        if (typeof operationCallback === 'function') operationCallback({
+        var callingBack = typeof operationCallback === 'function';
+        if (callingBack) operationCallback({
 
             behaviour: currentBehaviour.name,
             inputObjects: currentBehaviour.inputObjects,
@@ -32,19 +41,29 @@ var getFetchCancelCallback = function (currentBehaviour) {
     };
 };
 
-var getRequestCallback = function (currentBehaviour, serviceOperation, operationCallback, callback) {
+var getRequestCallback = function () {
 
+    var [
+        currentBehaviour,
+        serviceOperation,
+        operationCallback,
+        callback
+    ] = arguments;
     return function (serviceObjects, error) {
 
+        var state = currentBehaviour.state;
         if (serviceObjects) {
 
-            if (!currentBehaviour.state.serviceObjects) currentBehaviour.state.serviceObjects = [];
-            if (Array.isArray(serviceObjects))
-                Array.prototype.push.apply(currentBehaviour.state.serviceObjects, serviceObjects);
-            else currentBehaviour.state.serviceObjects.push(serviceObjects);
+            if (!state.serviceObjects) state.serviceObjects = [];
+            var many = Array.isArray(serviceObjects);
+            if (many) Array.prototype.push.apply(...[
+                state.serviceObjects,
+                serviceObjects
+            ]); else state.serviceObjects.push(serviceObjects);
         }
-        if (error) currentBehaviour.state.error = error;
-        if (typeof operationCallback === 'function') operationCallback({
+        if (error) state.error = error;
+        var callingBack = typeof operationCallback === 'function';
+        if (callingBack) operationCallback({
 
             behaviour: currentBehaviour.name,
             inputObjects: currentBehaviour.inputObjects,
@@ -55,19 +74,29 @@ var getRequestCallback = function (currentBehaviour, serviceOperation, operation
     };
 };
 
-var getManipulateCallback = function (currentBehaviour, modelOperation, operationCallback, callback) {
+var getManipulateCallback = function () {
 
+    var [
+        currentBehaviour,
+        modelOperation,
+        operationCallback,
+        callback
+    ] = arguments;
     return function (modelObjects, error) {
 
+        var state = currentBehaviour.state;
         if (modelObjects) {
 
-            if (!currentBehaviour.state.modelObjects) currentBehaviour.state.modelObjects = [];
-            if (Array.isArray(modelObjects))
-                Array.prototype.push.apply(currentBehaviour.state.modelObjects, modelObjects);
-            else currentBehaviour.state.modelObjects.push(modelObjects);
+            if (!state.modelObjects) state.modelObjects = [];
+            var many = Array.isArray(modelObjects);
+            if (many) Array.prototype.push.apply(...[
+                state.modelObjects,
+                modelObjects
+            ]); else state.modelObjects.push(modelObjects);
         }
-        if (error) currentBehaviour.state.error = error;
-        if (typeof operationCallback === 'function') operationCallback({
+        if (error) state.error = error;
+        var callingBack = typeof operationCallback === 'function';
+        if (callingBack) operationCallback({
 
             behaviour: currentBehaviour.name,
             inputObjects: currentBehaviour.inputObjects,
@@ -78,11 +107,17 @@ var getManipulateCallback = function (currentBehaviour, modelOperation, operatio
     };
 };
 
-var getMapFromCallback = function (currentBehaviour, operationCallback, callback) {
+var getMapFromCallback = function () {
 
+    var [
+        currentBehaviour,
+        operationCallback,
+        callback
+    ] = arguments;
     return function () {
 
-        if (typeof operationCallback === 'function') operationCallback({
+        var callingBack = typeof operationCallback === 'function';
+        if (callingBack) operationCallback({
 
             behaviour: currentBehaviour.name,
             inputObjects: currentBehaviour.inputObjects
@@ -91,12 +126,18 @@ var getMapFromCallback = function (currentBehaviour, operationCallback, callback
     };
 };
 
-var getMappingCallback = function (currentBehaviour, operation, operationCallback, callback) {
+var getMappingCallback = function () {
 
-
+    var [
+        currentBehaviour,
+        operation,
+        operationCallback,
+        callback
+    ] = arguments;
     return function (businessObjects) {
 
-        if (typeof operationCallback === 'function') operationCallback({
+        var callingBack = typeof operationCallback === 'function';
+        if (callingBack) operationCallback({
 
             behaviour: currentBehaviour.name,
             inputObjects: currentBehaviour.inputObjects,
@@ -109,36 +150,85 @@ var getMappingCallback = function (currentBehaviour, operation, operationCallbac
 var BusinessDelegator = function (options) {
 
     var self = this;
-    var modelOperationDelegate = options.modelOperationDelegate;
-    var serviceOperationDelegate = options.serviceOperationDelegate;
-    var businessOperationDelegate = options.businessOperationDelegate;
-    var FetchBehaviour = options.FetchBehaviour;
-    var operationCallback = options.operationCallback;
-    self.delegateServiceOperation = function (currentBehaviour, serviceOperation, callback) {
+    var {
+        modelOperationDelegate,
+        serviceOperationDelegate,
+        businessOperationDelegate,
+        FetchBehaviour,
+        operationCallback
+    } = options;
+    self.delegateServiceOperation = function () {
 
-        var fetchCallback = getFetchCallback(currentBehaviour, operationCallback, callback);
-        var requestCallback =
-            getRequestCallback(currentBehaviour, serviceOperation, operationCallback, callback);
-        var fetchCancelCallback = getFetchCancelCallback(currentBehaviour);
-        return FetchBehaviour && currentBehaviour instanceof FetchBehaviour ?
-            serviceOperationDelegate.fetch(fetchCallback, fetchCancelCallback) :
-            serviceOperationDelegate.request(serviceOperation, requestCallback);
+        var [
+            currentBehaviour,
+            serviceOperation,
+            callback
+        ] = arguments;
+        var fetchCallback = getFetchCallback(...[
+            currentBehaviour,
+            operationCallback,
+            callback
+        ]);
+        var fetchCancelCallback = getFetchCancelCallback(...[
+            currentBehaviour
+        ]);
+        var fetching = FetchBehaviour;
+        if (fetching) {
+
+            fetching = currentBehaviour instanceof FetchBehaviour;
+        }
+        var requestCallback = getRequestCallback(...[
+            currentBehaviour,
+            serviceOperation,
+            operationCallback,
+            callback
+        ]);
+        return fetching ? serviceOperationDelegate.fetch(...[
+            fetchCallback,
+            fetchCancelCallback
+        ]) : serviceOperationDelegate.request(...[
+            serviceOperation,
+            requestCallback
+        ]);
     };
-    self.delegateModelOperation = function (currentBehaviour, modelOperation, callback) {
+    self.delegateModelOperation = function () {
 
-        var manipulateCallback =
-            getManipulateCallback(currentBehaviour, modelOperation, operationCallback, callback);
-        return modelOperationDelegate.manipulate(modelOperation, manipulateCallback);
+        var [
+            currentBehaviour,
+            modelOperation,
+            callback
+        ] = arguments;
+        var manipulateCallback = getManipulateCallback(...[
+            currentBehaviour,
+            modelOperation,
+            operationCallback,
+            callback
+        ]);
+        return modelOperationDelegate.manipulate(...[
+            modelOperation,
+            manipulateCallback
+        ]);
     };
-    self.delegateServiceMappingOperation = function (currentBehaviour, callback) {
+    self.delegateServiceMappingOperation = function () {
 
-        var isOnlineAction = currentBehaviour.getType() === BehaviourTypes.ONLINEACTION;
-        var mapFromCallback = getMapFromCallback(currentBehaviour, operationCallback, callback);
-        return businessOperationDelegate.mapFromObjects(currentBehaviour.inputObjects,
-            currentBehaviour.getProperty, isOnlineAction, mapFromCallback);
+        var [currentBehaviour, callback] = arguments;
+        var type = currentBehaviour.getType();
+        var isOnlineAction = type === BehaviourTypes.ONLINEACTION;
+        var mapFromCallback = getMapFromCallback(...[
+            currentBehaviour,
+            operationCallback,
+            callback
+        ]);
+        return businessOperationDelegate.mapFromObjects(...[
+            currentBehaviour.inputObjects,
+            currentBehaviour.getProperty,
+            isOnlineAction,
+            mapFromCallback
+        ]);
     };
-    self.delegateModelMappingOperation = function (currentBehaviour, callback) {
+    self.delegateModelMappingOperation = function () {
 
+        var [currentBehaviour, callback] = arguments;
         var operation = null;
         switch (currentBehaviour.getType()) {
 
@@ -151,24 +241,39 @@ var BusinessDelegator = function (options) {
                 operation = OperationType.MAPTO;
                 break;
         }
+        var state = currentBehaviour.state;
         switch (operation) {
 
             case OperationType.MAPTO: {
-                var fromObjects =
-                    currentBehaviour.state.modelObjects || currentBehaviour.state.serviceObjects;
-                var mappingCallback =
-                    getMappingCallback(currentBehaviour, operation, operationCallback, callback);
-                return businessOperationDelegate.
-                    mapToObjects(fromObjects, currentBehaviour.getProperty, mappingCallback);
+                var fromObjects = state.modelObjects;
+                if (!fromObjects) fromObjects = state.serviceObjects;
+                var mappingCallback = getMappingCallback(...[
+                    currentBehaviour,
+                    operation,
+                    operationCallback,
+                    callback
+                ]);
+                return businessOperationDelegate.mapToObjects(...[
+                    fromObjects,
+                    currentBehaviour.getProperty,
+                    mappingCallback
+                ]);
             }
             case OperationType.MAPBETWEEN: {
-                var fromObjects =
-                    currentBehaviour.state.modelObjects || currentBehaviour.state.serviceObjects;
-                var mappingCallback =
-                    getMappingCallback(currentBehaviour, operation, operationCallback, callback);
-                return businessOperationDelegate.
-                    mapBetweenObjects(fromObjects, currentBehaviour.inputObjects,
-                        currentBehaviour.getProperty, mappingCallback);
+                var fromObjects = state.modelObjects;
+                if (!fromObjects) fromObjects = state.serviceObjects;
+                var mappingCallback = getMappingCallback(...[
+                    currentBehaviour,
+                    operation,
+                    operationCallback,
+                    callback
+                ]);
+                return businessOperationDelegate.mapBetweenObjects(...[
+                    fromObjects,
+                    currentBehaviour.inputObjects,
+                    currentBehaviour.getProperty,
+                    mappingCallback
+                ]);
             }
         }
     };

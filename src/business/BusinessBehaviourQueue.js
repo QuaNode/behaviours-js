@@ -1,30 +1,41 @@
 /*jslint node: true */
 'use strict';
 
-var getCancelFunc =
-    function (behaviour, cancelExecutingBehaviour, behaviourQueue, executingBehaviourQueue) {
+var getCancelFunc = function () {
 
-        var self = this;
-        return function (ignoreSetComplete) {
+    var self = this;
+    var [
+        behaviour,
+        cancelExecutingBehaviour,
+        behaviourQueue,
+        executingBehaviourQueue
+    ] = arguments;
+    return function (ignoreSetComplete) {
 
-            behaviourQueue.forEach(function (bhv) {
+        behaviourQueue.forEach(function (queueBehaviour) {
 
-                if (behaviour.hasMandatoryBehaviour(bhv)) {
+            if (behaviour.hasMandatoryBehaviour(...[
+                queueBehaviour
+            ])) getCancelFunc.apply(self, [
+                queueBehaviour,
+                cancelExecutingBehaviour,
+                behaviourQueue,
+                executingBehaviourQueue
+            ])();
+        });
+        if (executingBehaviourQueue.indexOf(behaviour) > -1) {
 
-                    getCancelFunc.apply(self,
-                        [bhv, cancelExecutingBehaviour, behaviourQueue, executingBehaviourQueue])();
-                }
-            });
-            if (executingBehaviourQueue.indexOf(behaviour) > -1) {
-
-                if (typeof cancelExecutingBehaviour === 'function')
-                    cancelExecutingBehaviour(behaviour);
-            } else if (behaviourQueue.indexOf(behaviour) > -1) {
-
-                self.dequeue(behaviour, ignoreSetComplete, 'cancelled');
-            }
-        };
+            var cancelling = typeof cancelExecutingBehaviour === 'function';
+            if (cancelling) cancelExecutingBehaviour(...[
+                behaviour
+            ]);
+        } else if (behaviourQueue.indexOf(behaviour) > -1) self.dequeue(...[
+            behaviour,
+            ignoreSetComplete,
+            'cancelled'
+        ]);
     };
+};
 
 var getCompletionObject = function (completionDelegate) {
 
@@ -37,18 +48,28 @@ var getCompletionObject = function (completionDelegate) {
         },
         apply: function (success, dependentBehaviours) {
 
-            this.data.success = typeof success === 'boolean' ? success : this.data.success;
-            this.data.dependentBehaviours = dependentBehaviours || this.data.dependentBehaviours;
+            if (typeof success === 'boolean') this.data.success = success;
+            if (dependentBehaviours) {
+
+                this.data.dependentBehaviours = dependentBehaviours;
+            }
             completionDelegate(function () {
 
-                return typeof this.data.success === 'function' ?
-                    this.data.success.apply(null, arguments) :
-                    this.data.success;
+                if (typeof this.data.success === 'function') {
+
+                    return this.data.success.apply(null, arguments);
+                }
+                return this.data.success;
             }, function () {
 
-                return typeof this.data.dependentBehaviours === 'function' ?
-                    this.data.dependentBehaviours.apply(null, arguments) :
-                    this.data.dependentBehaviours;
+                if (typeof this.data.dependentBehaviours === 'function') {
+
+                    return this.data.dependentBehaviours.apply(...[
+                        null,
+                        arguments
+                    ]);
+                }
+                return this.data.dependentBehaviours;
             });
         },
         success: function () {
@@ -69,26 +90,24 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
     var self = this;
     var behaviourQueue = [];
     var executingBehaviourQueue = [];
-    self.length = function () {
-
-        return behaviourQueue.length;
-    };
+    self.length = () => behaviourQueue.length;
     self.cancelAll = function (cancelExecutingBehaviour) {
 
         for (var i = 0; i < behaviourQueue.length; i++) {
 
-            getCancelFunc.apply(self,
-                [behaviourQueue[i], cancelExecutingBehaviour, behaviourQueue,
-                    executingBehaviourQueue])();
+            getCancelFunc.apply(self, [
+                behaviourQueue[i],
+                cancelExecutingBehaviour,
+                behaviourQueue,
+                executingBehaviourQueue
+            ])();
         }
     };
-    self.isEnqueued = function (behaviour) {
+    self.isEnqueued = (behaviour) => behaviourQueue.some(function () {
 
-        return behaviourQueue.some(function (bhv) {
-
-            return behaviour.isEqualToBehaviour(bhv);
-        });
-    };
+        var [queueBehaviour] = arguments;
+        return behaviour.isEqualToBehaviour(queueBehaviour);
+    });
     self.suspend = function (currentBehaviour) {
 
         var index = behaviourQueue.indexOf(currentBehaviour);
@@ -104,45 +123,75 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
 
         for (var i = behaviourQueue.length - 1; true; i--) {
 
-            var currentBehaviour = i < 0 ? null : behaviourQueue[i];
-            if (i < 0 || currentBehaviour.hasMandatoryBehaviour(behaviour) ||
-                currentBehaviour.priority < behaviour.priority) {
+            var shouldEnqueue = i < 0;
+            var currentBehaviour = shouldEnqueue ? null : behaviourQueue[i];
+            shouldEnqueue |= currentBehaviour.hasMandatoryBehaviour(behaviour);
+            shouldEnqueue |= currentBehaviour.priority < behaviour.priority;
+            if (shouldEnqueue) {
 
                 behaviourQueue.splice(i + 1, 0, behaviour);
                 break;
             }
         }
-        if (behaviourQueue.indexOf(behaviour) === behaviourQueue.length - 1) next();
-        return getCancelFunc.apply(self,
-            [behaviour, cancelExecutingBehaviour, behaviourQueue, executingBehaviourQueue]);
+        if (behaviourQueue.indexOf(...[
+            behaviour
+        ]) === behaviourQueue.length - 1) next();
+        return getCancelFunc.apply(self, [
+            behaviour,
+            cancelExecutingBehaviour,
+            behaviourQueue,
+            executingBehaviourQueue
+        ]);
     };
-    self.dequeue = function (currentBehaviour, ignoreSetComplete, error) {
+    self.dequeue = function () {
 
+        var [
+            currentBehaviour,
+            ignoreSetComplete,
+            error
+        ] = arguments;
         var index = behaviourQueue.indexOf(currentBehaviour);
         if (index > -1) {
 
             behaviourQueue.splice(index, 1);
-            var completionDelegate = function (isSuccess, getDependentBehaviours) {
+            var completionDelegate = function () {
 
-                var success = typeof isSuccess === 'function' && isSuccess();
-                var dependentBehaviours = (typeof getDependentBehaviours === 'function' &&
-                    getDependentBehaviours()) || [];
-                if (!success) {
+                var [isSuccess, getDependentBehaviours] = arguments;
+                var success = typeof isSuccess === 'function';
+                if (success) success = isSuccess();
+                var dependentBehaviours = [];
+                if (typeof getDependentBehaviours === 'function') {
 
-                    dependentBehaviours.forEach(function (bhv) {
-
-                        if (executingBehaviourQueue.indexOf(bhv) === -1 &&
-                            behaviourQueue.indexOf(bhv) > -1) {
-
-                            self.dequeue(bhv, false, 'failed');
-                        }
-                    });
+                    dependentBehaviours = getDependentBehaviours();
                 }
-            };
-            if (!ignoreSetComplete && typeof setComplete === 'function') setTimeout(function () {
+                if (!success) dependentBehaviours.forEach(function () {
 
-                if (typeof setError === 'function' && error) setError(currentBehaviour, error);
-                setComplete(currentBehaviour, getCompletionObject(completionDelegate));
+                    var [executingBehaviour] = arguments;
+                    var shouldDequeue = behaviourQueue.indexOf(...[
+                        executingBehaviour
+                    ]) > -1;
+                    shouldDequeue &= executingBehaviourQueue.indexOf(...[
+                        executingBehaviour
+                    ]) === -1;
+                    if (shouldDequeue) self.dequeue(...[
+                        executingBehaviour,
+                        false,
+                        'failed'
+                    ]);
+                });
+            };
+            var completing = !ignoreSetComplete;
+            completing &= typeof setComplete === 'function';
+            if (completing) setTimeout(function () {
+
+                if (typeof setError === 'function' && error) {
+
+                    setError(currentBehaviour, error);
+                }
+                setComplete(...[
+                    currentBehaviour,
+                    getCompletionObject(completionDelegate)
+                ]);
             });
             return true;
         }
@@ -153,7 +202,9 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
         var currentBehaviour = null;
         for (var i = behaviourQueue.length - 1; i >= 0; i--) {
 
-            if (executingBehaviourQueue.indexOf(behaviourQueue[i]) === -1) {
+            if (executingBehaviourQueue.indexOf(...[
+                behaviourQueue[i]
+            ]) === -1) {
 
                 currentBehaviour = behaviourQueue[i];
                 executingBehaviourQueue.push(currentBehaviour);
@@ -164,11 +215,16 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
     };
     self.finish = function (currentBehaviour, next) {
 
-        if (executingBehaviourQueue.every(function (bhv) {
+        if (executingBehaviourQueue.every(function () {
 
-            return !bhv.hasMandatoryBehaviour(currentBehaviour);
+            var [executingBehaviour] = arguments;
+            return !executingBehaviour.hasMandatoryBehaviour(...[
+                currentBehaviour
+            ]);
         })) next();
-        var index = executingBehaviourQueue.indexOf(currentBehaviour);
+        var index = executingBehaviourQueue.indexOf(...[
+            currentBehaviour
+        ]);
         if (index > -1) executingBehaviourQueue.splice(index, 1);
     };
 };

@@ -1,65 +1,106 @@
 /*jslint node: true */
 'use strict';
 
-var getManipulateDelegate = function (modelOperation, modelOperations, modelMethods, callback) {
+var getManipulateDelegate = function () {
 
     var self = this;
-    return function (getObjWrapperOrObjAttributes, getModelEntity, setModelObjects) {
+    var [
+        modelOperation,
+        modelOperations,
+        modelMethods,
+        callback
+    ] = arguments;
+    return function () {
 
-        if (!self.modelController) throw new Error('No model controller for offline behaviour');
+        var [
+            getObjWrapperOrObjAttributes,
+            getModelEntity,
+            setModelObjects
+        ] = arguments;
+        if (!self.modelController) {
+
+            throw new Error('No model controller for offline behaviour');
+        }
         for (var i = 0; i < modelOperations.length; i++) {
 
-            if (typeof self.modelController[modelMethods[modelOperations[i]]] !== 'function')
+            var method = modelMethods[modelOperations[i]];
+            if (typeof self.modelController[method] !== 'function') {
+
                 throw new Error('Invalid model method');
+            }
         }
         var modelCallback = function (modelObjects, error) {
 
-            if (typeof setModelObjects === 'function' && setModelObjects(modelObjects, error) &&
-                modelObjects) {
+            var callingBack = typeof setModelObjects === 'function';
+            if (callingBack) {
 
-                callback(modelObjects, error);
-            } else callback(null, error);
+                callingBack &= setModelObjects(modelObjects, error);
+            }
+            if (callingBack) callingBack &= modelObjects;
+            if (callingBack) callback(modelObjects, error);
+            else callback(null, error);
         };
-        var wp = (typeof getObjWrapperOrObjAttributes === 'function' &&
-            getObjWrapperOrObjAttributes()) || [];
+        var wp = typeof getObjWrapperOrObjAttributes === 'function';
+        if (wp) wp = getObjWrapperOrObjAttributes();
+        else wp = [];
         if (typeof getModelEntity === 'function') {
 
             var md = getModelEntity();
-            self.modelController[modelMethods[modelOperation]](wp, md, modelCallback);
-        } else {
-
-            modelCallback();
-        }
+            var method = modelMethods[modelOperation];
+            self.modelController[method](wp, md, modelCallback);
+        } else modelCallback();
     };
 };
 
 var ModelOperationDelegate = function (options) {
 
     var self = this;
-    var modelController = options.modelController;
-    var getModelMethods = options.getModelMethods || function (index) {
+    var {
+        modelController,
+        getModelMethods,
+        modelOperations
+    } = options;
+    if (!getModelMethods) getModelMethods = function (index) {
 
-        var methods = ['newObjects', 'removeObjects', 'getObjects'];
+        var methods = [
+            'addObjects',
+            'removeObjects',
+            'getObjects'
+        ];
         return index === undefined ? methods : methods[index];
     };
-    var modelOperations = options.modelOperations;
     var modelMethods = {};
     if (modelController) {
 
-        if (typeof getModelMethods !== 'function' || !(Array.isArray(getModelMethods())) ||
-            getModelMethods().length < 3) throw new Error('Invalid model methods');
+        var invalidMethods = typeof getModelMethods !== 'function';
+        if (!invalidMethods) {
+
+            invalidMethods |= !Array.isArray(getModelMethods());
+        }
+        if (!invalidMethods) {
+
+            invalidMethods |= getModelMethods().length < 3;
+        }
+        if (invalidMethods) throw new Error('Invalid model methods');
         for (var i = 0; i < modelOperations.length; i++) {
 
-            modelMethods[modelOperations[i]] = getModelMethods(i, modelOperations[i]);
-            if (typeof modelController[modelMethods[modelOperations[i]]] !== 'function')
+            var method = getModelMethods(i, modelOperations[i]);
+            modelMethods[modelOperations[i]] = method;
+            if (typeof modelController[method] !== 'function') {
+
                 throw new Error('Invalid model method');
+            }
         }
     }
     self.modelController = modelController;
     self.manipulate = function (modelOperation, callback) {
 
-        return getManipulateDelegate.apply(self,
-            [modelOperation, modelOperations, modelMethods, callback]);
+        return getManipulateDelegate.apply(self, [
+            modelOperation,
+            modelOperations,
+            modelMethods,
+            callback
+        ]);
     };
 };
 

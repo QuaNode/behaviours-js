@@ -1,35 +1,43 @@
 /*jslint node: true */
 'use strict';
 
-module.exports.ServiceObjectMetadata = function (options) {
+var ServiceAttributeMetadata;
+
+var ServiceObjectMetadata = module.exports.ServiceObjectMetadata = function (options) {
 
     var self = this;
-    var modelAttributes = options.modelAttributes;
-    var serviceAttributes = options.serviceAttributes;
-    if (typeof options.model === 'string') {
+    var {
+        modelAttributes,
+        serviceAttributes,
+        model,
+        name,
+        attributesKeyName,
+        attributesValueName,
+        id,
+        storeID
+    } = options;
+    if (typeof model === 'string') self.model = model;
+    if (typeof name === 'string') self.name = name;
+    if (typeof attributesKeyName === 'string') {
 
-        self.model = options.model;
+        self.attributesKeyName = attributesKeyName;
     }
-    if (typeof options.name === 'string') {
+    if (typeof attributesValueName === 'string') {
 
-        self.name = options.name;
+        self.attributesValueName = attributesValueName;
     }
-    if (typeof options.attributesKeyName === 'string') {
+    var many = Array.isArray(modelAttributes);
+    many &= Array.isArray(serviceAttributes);
+    if (many) {
 
-        self.attributesKeyName = options.attributesKeyName;
-    }
-    if (typeof options.attributesValueName === 'string') {
+        if (modelAttributes.length !== serviceAttributes.length) {
 
-        self.attributesValueName = options.attributesValueName;
-    }
-    if (Array.isArray(modelAttributes) && Array.isArray(serviceAttributes)) {
-
-        if (modelAttributes.length !== serviceAttributes.length)
             throw new Error('Invalid attributes count');
+        }
         self.attributes = [];
         for (var i = 0; i < modelAttributes.length; i++) {
 
-            var attribute = new module.exports.ServiceAttributeMetadata({
+            var attribute = new ServiceAttributeMetadata({
 
                 model: modelAttributes[i],
                 name: serviceAttributes[i],
@@ -37,33 +45,34 @@ module.exports.ServiceObjectMetadata = function (options) {
             self.attributes.push(attribute);
         }
     }
-    if (typeof options.id === 'string') {
-
-        self.id = options.id;
-    }
-    self.storeID = options.storeID;
+    if (typeof id === 'string') self.id = id;
+    self.storeID = storeID;
 };
 
-module.exports.ServiceAttributeMetadata = function (options) {
+module.exports.ServiceAttributeMetadata = ServiceAttributeMetadata = function (options) {
 
     var self = this;
-    if (typeof options.model === 'string') {
+    var {
+        model,
+        name,
+        getValue,
+        metadata
+    } = options;
+    if (typeof model === 'string') self.model = model;
+    if (typeof name === 'string') self.name = name;
+    if (getValue) {
 
-        self.model = options.model;
-    }
-    if (typeof options.name === 'string') {
-
-        self.name = options.name;
-    }
-    if (options.getValue) {
-
-        if (typeof options.getValue === 'function') self.getValue = options.getValue;
+        if (typeof getValue === 'function') self.getValue = getValue;
         else throw new Error('Invalid service attribute value function');
     }
-    if (options.metadata) {
+    if (metadata) {
 
-        if (options.metadata instanceof module.exports.ServiceObjectMetadata)
-            self.metadata = options.metadata;
-        else throw new Error('Invalid service attribute object metadata');
+        if (metadata instanceof ServiceObjectMetadata) {
+
+            self.metadata = metadata;
+        } else {
+
+            throw new Error('Invalid service attribute object metadata');
+        }
     }
 };

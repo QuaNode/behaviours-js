@@ -1,15 +1,19 @@
 /*jslint node: true */
 'use strict';
 
-var getIfReturn = function (beginConditions, condition) {
+var getIfReturn = function () {
 
     var self = this;
+    var [beginConditions, condition] = arguments;
     return {
 
         begin: function () {
 
             var operations = arguments[0];
-            if (typeof operations === 'string') operations = [operations];
+            if (typeof operations === 'string') {
+
+                operations = [operations];
+            }
             if (Array.isArray(operations)) {
 
                 for (var i = 0; i < operations.length; i++) {
@@ -22,59 +26,80 @@ var getIfReturn = function (beginConditions, condition) {
     };
 };
 
-var getUseReturn = function (middlewares, middleware, useConditions, beginConditions, begin) {
+var getUseReturn = function () {
 
     var self = this;
+    var [
+        middlewares,
+        middleware,
+        useConditions,
+        beginConditions,
+        begin
+    ] = arguments;
     return {
 
         begin: function () {
 
             for (var j = 0; j < arguments.length; j++) {
 
-                if (typeof arguments[j] !== 'function') throw new Error('Invalid begin parameters');
+                if (typeof arguments[j] !== 'function') {
+
+                    throw new Error('Invalid begin parameters');
+                }
             }
             begin = arguments;
             return this;
         },
-        when: function (operations, condition, options) {
+        when: function () {
 
-            if (typeof condition === 'object' && typeof options !== 'object') {
-
-                options = condition;
-            }
+            var [operations, condition, options] = arguments;
+            var withoutCondition = typeof condition === 'object';
+            withoutCondition &= typeof options !== 'object';
+            if (withoutCondition) options = condition;
             var useMiddlewareWhen = function (operation) {
 
+                var usedMiddlewares = middlewares[operation];
                 if (typeof options === 'object') {
 
-                    if (options.order > -1 && options.order < middlewares[operation].length) {
+                    var followingOrder = options.order > -1;
+                    followingOrder &= options.order < usedMiddlewares.length;
+                    if (followingOrder) {
 
                         if (options.override === true) {
 
-                            middlewares[operation][options.order] = middleware;
+                            usedMiddlewares[options.order] = middleware;
                             return;
                         } else {
 
-                            middlewares[operation].splice(options.order, 0, middleware);
+                            usedMiddlewares.splice(options.order, 0, middleware);
                             return;
                         }
                     } else if (options.override === true) {
 
-                        middlewares[operation] = [middleware];
+                        usedMiddlewares = middlewares[operation] = [middleware];
                         return;
                     }
                 }
-                if (typeof condition === 'boolean' || typeof condition === 'function') {
+                var withCondition = typeof condition === 'boolean';
+                withCondition |= typeof condition === 'function';
+                if (withCondition) {
 
                     useConditions[operations[i]] = condition;
                     if (begin) beginConditions[operations[i]] = condition;
                 }
-                if (!Array.isArray(middlewares[operation])) middlewares[operation] = [];
-                middlewares[operation].push(middleware);
+                if (!Array.isArray(usedMiddlewares)) {
+
+                    usedMiddlewares = middlewares[operation] = [];
+                }
+                usedMiddlewares.push(middleware);
             };
             if (!Array.isArray(operations)) operations = [operations];
             for (var i = 0; i < operations.length; i++) {
 
-                if (typeof operations[i] !== 'string') throw new Error('Invalid operation key');
+                if (typeof operations[i] !== 'string') {
+
+                    throw new Error('Invalid operation key');
+                }
                 useMiddlewareWhen(operations[i]);
             }
             if (begin) {
@@ -91,15 +116,21 @@ var getUseReturn = function (middlewares, middleware, useConditions, beginCondit
 var BusinessLanguage = function (options) {
 
     var self = this;
-    var middlewares = options.middlewares;
-    var delegates = options.delegates;
-    var watchers = options.watchers;
-    var useConditions = options.useConditions;
-    var beginConditions = options.beginConditions;
+    var {
+        middlewares,
+        delegates,
+        watchers,
+        useConditions,
+        beginConditions
+    } = options;
     self.watch = function (operation, callback) {
 
-        if (typeof operation !== 'string' || typeof callback !== 'function')
+        var withoutOperation = typeof operation !== 'string';
+        var withoutCallback = typeof callback !== 'function';
+        if (withoutOperation || withoutCallback) {
+
             throw new Error('Invalid watch parameters');
+        }
         if (!watchers[operation]) watchers[operation] = [];
         watchers[operation].push(callback);
         return self;
@@ -107,22 +138,32 @@ var BusinessLanguage = function (options) {
     self.if = function () {
 
         var condition = arguments[0];
-        return getIfReturn.apply(self, [beginConditions, condition]);
+        return getIfReturn.apply(self, [
+            beginConditions,
+            condition
+        ]);
     };
     self.begin = function () {
 
         if (arguments.length > 1) {
 
             var operations = arguments[0];
-            if (typeof operations === 'string' && typeof arguments[1] === 'function') {
+            var oneOperation = typeof operations === 'string';
+            oneOperation &= typeof arguments[1] === 'function';
+            var manyOperations = Array.isArray(operations);
+            if (manyOperations) {
 
-                delegates[operations] = arguments[1];
-            } else if (Array.isArray(operations) && operations.length <= arguments.length - 1) {
+                manyOperations = operations.length <= arguments.length - 1;
+            }
+            if (oneOperation) delegates[operations] = arguments[1];
+            else if (manyOperations) {
 
                 for (var i = 1; i < arguments.length; i++) {
 
-                    if (typeof arguments[i] !== 'function')
+                    if (typeof arguments[i] !== 'function') {
+
                         throw new Error('Invalid delegate function');
+                    }
                     delegates[operations[i - 1]] = arguments[i];
                 }
             } else throw new Error('Invalid begin parameters');
@@ -131,11 +172,18 @@ var BusinessLanguage = function (options) {
     };
     self.use = function (middleware) {
 
-        if (typeof middleware !== 'function')
+        if (typeof middleware !== 'function') {
+
             throw new Error('Invalid behaviour middleware function');
+        }
         var begin = null;
-        return getUseReturn.apply(self,
-            [middlewares, middleware, useConditions, beginConditions, begin]);
+        return getUseReturn.apply(self, [
+            middlewares,
+            middleware,
+            useConditions,
+            beginConditions,
+            begin
+        ]);
     };
 };
 

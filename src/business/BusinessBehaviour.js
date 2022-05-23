@@ -3,8 +3,8 @@
 'use strict';
 
 var copy = require('shallow-copy');
-var BusinessBehaviourCore = require('./BusinessBehaviourCore.js').BusinessBehaviourCore;
-var BusinessLanguage = require('./BusinessLanguage.js').BusinessLanguage;
+var { BusinessBehaviourCore } = require('./BusinessBehaviourCore.js');
+var { BusinessLanguage } = require('./BusinessLanguage.js');
 var define = require('define-js');
 
 var BusinessBehaviourType = {
@@ -19,7 +19,10 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
 
     return function (options) {
 
-        if (typeof options !== 'object') throw new Error('Invalid behaviour parameters');
+        if (typeof options !== 'object') {
+
+            throw new Error('Invalid behaviour parameters');
+        }
         var languageParameters = {
 
             middlewares: {},
@@ -29,7 +32,9 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
             beginConditions: {},
         };
         var self = init.apply(this, [languageParameters]).self();
-        var businessBehaviourCore = new BusinessBehaviourCore(languageParameters);
+        var businessBehaviourCore = new BusinessBehaviourCore(...[
+            languageParameters
+        ]);
         var type = null;
         self.priority = options.priority;
         self.name = options.name;
@@ -37,19 +42,19 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
         self.state = {};
         self.searchText = options.searchText;
         self.mandatoryBehaviour = options.mandatoryBehaviour;
-        self.getType = function () {
-
-            return type;
-        };
+        self.getType = () => type;
         self.setType = function (typeParameter) {
 
             if (typeParameter !== undefined) {
 
                 for (var behaviourType in BusinessBehaviourType) {
 
-                    if (BusinessBehaviourType.hasOwnProperty(behaviourType)) {
+                    if (BusinessBehaviourType.hasOwnProperty(...[
+                        behaviourType
+                    ])) {
 
-                        if (BusinessBehaviourType[behaviourType] === typeParameter) {
+                        var typë = BusinessBehaviourType[behaviourType];
+                        if (typë === typeParameter) {
 
                             type = typeParameter;
                             return;
@@ -60,47 +65,72 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
             throw new Error('Invalid behaviour type');
         };
         self.setType(options.type);
-        self.prepareOperations = function (serviceOperations, modelOperations, businessOperations) {
+        self.prepareOperations = function () {
 
+            var [
+                serviceOperations,
+                modelOperations,
+                businessOperations
+            ] = arguments;
             self.state.serviceOperations = copy(serviceOperations);
             self.state.modelOperations = copy(modelOperations);
             self.state.businessOperations = copy(businessOperations);
-            Object.keys(languageParameters.delegates).every(function (delegate) {
+            Object.keys(languageParameters.delegates).every(function () {
 
-                if (businessOperations
-                    .concat(serviceOperations)
-                    .concat(modelOperations).indexOf(delegate) === -1)
+                var [delegate] = arguments;
+                if ([
+                    ...businessOperations,
+                    ...serviceOperations,
+                    ...modelOperations
+                ].indexOf(delegate) === -1) {
+
                     throw new Error('Invalid operation name: ' + delegate);
+                }
             });
         };
-        self.beginServiceOperation = function (serviceOperation) {
+        var {
+            beginServiceOperation,
+            beginModelOperation,
+            beginBusinessOperation
+        } = businessBehaviourCore;
+        self.beginServiceOperation = function () {
 
-            return businessBehaviourCore.beginServiceOperation.apply(self, arguments);
+            return beginServiceOperation.apply(...[
+                self,
+                arguments
+            ]);
         };
-        self.beginModelOperation = function (modelOperation) {
+        self.beginModelOperation = function () {
 
-            return businessBehaviourCore.beginModelOperation.apply(self, arguments);
+            return beginModelOperation.apply(...[
+                self,
+                arguments
+            ]);
         };
-        self.beginBusinessOperation = function (businessOperation) {
+        self.beginBusinessOperation = function () {
 
-            return businessBehaviourCore.beginBusinessOperation.apply(self, arguments);
+            return beginBusinessOperation.apply(...[
+                self,
+                arguments
+            ]);
         };
     };
 }).extend(BusinessLanguage).defaults({});
 
-BusinessBehaviour.prototype.hasMandatoryBehaviour = function (behaviour) {
+BusinessBehaviour.prototype.hasMandatoryBehaviour = function () {
 
     var self = this;
-    if (behaviour && self.mandatoryBehaviour === behaviour) return true;
+    var [behaviour] = arguments;
+    var mandatory = self.mandatoryBehaviour === behaviour;
+    if (behaviour && mandatory) return true;
     else if (self.mandatoryBehaviour instanceof BusinessBehaviour) {
 
-        return self.mandatoryBehaviour.hasMandatoryBehaviour(behaviour);
+        return self.mandatoryBehaviour.hasMandatoryBehaviour(...[
+            behaviour
+        ]);
     } else return false;
 };
 
-BusinessBehaviour.prototype.isEqualToBehaviour = function (behaviour) {
-
-    return this === behaviour;
-};
+BusinessBehaviour.prototype.isEqualToBehaviour = (behaviour) => this === behaviour;
 
 module.exports.BusinessBehaviourType = BusinessBehaviourType;
