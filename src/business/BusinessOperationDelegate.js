@@ -1,8 +1,8 @@
 /*jslint node: true */
 /*jshint esversion: 6 */
-'use strict';
+"use strict";
 
-var { BusinessObjectMapping } = require('./BusinessObjectMapping.js');
+var { BusinessObjectMapping } = require("./BusinessObjectMapping.js");
 
 var getInputObjectsReturn = function () {
 
@@ -27,21 +27,21 @@ var getInputObjectsReturn = function () {
 
                     inputObjects.push(inputObject);
                     if (objects[index + 1]) push(index + 1, inputObjects);
-                    else if (typeof cb === 'function') cb(inputObjects);
+                    else if (typeof cb === "function") cb(inputObjects);
                 });
             }, 0);
         };
         if (Array.isArray(objects)) {
 
             if (objects[0]) push(0, []);
-            else if (typeof cb === 'function') cb([]);
+            else if (typeof cb === "function") cb([]);
         } else if (objects) getInputObject(...[
             objects,
             superProperty,
             getSubProperty
         ])(function (inputObject) {
 
-            if (typeof cb === 'function') cb(inputObject);
+            if (typeof cb === "function") cb(inputObject);
         });
     };
 };
@@ -80,9 +80,9 @@ var getInputObjectReturn = function () {
             getProperty
         ])(function () {
 
-            if (typeof cb === 'function') cb(inputObject);
+            if (typeof cb === "function") cb(inputObject);
         });
-        else if (typeof cb === 'function') cb(inputObject);
+        else if (typeof cb === "function") cb(inputObject);
     };
 };
 
@@ -109,12 +109,12 @@ var getBusinessObjectsReturn = function () {
 
                     businessObjects.push(businessObject);
                     if (objects[index + 1]) push(index + 1, businessObjects);
-                    else if (typeof cb === 'function') cb(businessObjects);
+                    else if (typeof cb === "function") cb(businessObjects);
                 });
             }, 0);
         };
         if (objects[0]) push(0, []);
-        else if (typeof cb === 'function') cb([]);
+        else if (typeof cb === "function") cb([]);
     };
 };
 
@@ -145,7 +145,7 @@ var mapObjects = function () {
             getBusinessObjects,
             getIdentificationAttributes
         ]);
-        var settingBusinessObject_s = typeof setBusinessObjects === 'function';
+        var settingBusinessObject_s = typeof setBusinessObjects === "function";
         var fromMany = Array.isArray(fromObjects);
         if (settingBusinessObject_s) (fromMany ? getBusinessObjects : getBusinessObject)(...[
             fromObjects
@@ -190,7 +190,7 @@ var getBusinessObjectReturn_To = function () {
             getProperty
         ])(function () {
 
-            if (typeof cb === 'function') cb(businessObject);
+            if (typeof cb === "function") cb(businessObject);
         });
     };
 };
@@ -215,7 +215,7 @@ var getBusinessObjectReturn_Between = function () {
             inputObjects
         ]).filter(function (inputObject) {
 
-            if (typeof getIdentificationAttributes === 'function') {
+            if (typeof getIdentificationAttributes === "function") {
 
                 return getIdentificationAttributes().every(function () {
 
@@ -248,7 +248,7 @@ var getBusinessObjectReturn_Between = function () {
             getSubProperty ||
             getProperty
         ]);
-        if (typeof cb === 'function') cb(businessObject);
+        if (typeof cb === "function") cb(businessObject);
     };
 };
 
@@ -295,7 +295,7 @@ BusinessOperationDelegate.prototype.mapFromObjects = function () {
                 getInputObject
             ]);
         };
-        if (typeof setInputObjects === 'function') getInputObjects(...[
+        if (typeof setInputObjects === "function") getInputObjects(...[
             fromObjects
         ])(function (inputObjects) {
 

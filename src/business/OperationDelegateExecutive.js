@@ -1,8 +1,8 @@
 /*jslint node: true */
 /*jshint esversion: 6 */
-'use strict';
+"use strict";
 
-var parse = require('parseparams');
+var parse = require("parseparams");
 
 var watch = function () {
 
@@ -13,12 +13,15 @@ var watch = function () {
         continṵe,
         watchers
     ] = arguments;
-    var watching = watchers[operation];
+    var watching = !!watchers[operation];
     watching &= index > -1;
-    watching &= index < watchers[operation].length;
     if (watching) {
 
-        var async = parse(watchers[operation][index])[1] === 'continṵe';
+        watching &= index < watchers[operation].length;
+    }
+    if (watching) {
+
+        var async = parse(watchers[operation][index])[1] === "continṵe";
         if (async) watchers[operation][index](...[
             data,
             () => watch(...[
@@ -45,9 +48,9 @@ var getServiceContinue = function (delegate) {
     var that = this;
     return function () {
 
-        var lazyParameters = typeof that.data.parameters === 'function';
-        var lazyService = typeof that.data.service === 'function';
-        var callingBack = typeof that.data.callback === 'function';
+        var lazyParameters = typeof that.data.parameters === "function";
+        var lazyService = typeof that.data.service === "function";
+        var callingBack = typeof that.data.callback === "function";
         delegate(...[
             lazyParameters ? that.data.parameters : () => that.data.parameters,
             lazyService ? that.data.service : () => that.data.service,
@@ -65,9 +68,9 @@ var getModelContinue = function (delegate) {
     var that = this;
     return function () {
 
-        var lazyWrapper = typeof that.data.wrapper === 'function';
-        var lazyEntity = typeof that.data.entity === 'function';
-        var callingBack = typeof that.data.callback === 'function';
+        var lazyWrapper = typeof that.data.wrapper === "function";
+        var lazyEntity = typeof that.data.entity === "function";
+        var callingBack = typeof that.data.callback === "function";
         delegate(...[
             lazyWrapper ? that.data.wrapper : () => that.data.wrapper,
             lazyEntity ? that.data.entity : () => that.data.entity,
@@ -85,7 +88,7 @@ var getServiceMappingContinue = function (delegate) {
     var that = this;
     return function () {
 
-        var callingBack = typeof that.data.callback === 'function';
+        var callingBack = typeof that.data.callback === "function";
         delegate(function () {
 
             if (callingBack) that.data.callback.apply(null, arguments);
@@ -98,8 +101,8 @@ var getModelMappingContinue = function (delegate) {
     var that = this;
     return function () {
 
-        var lazyIdentifiers = typeof that.data.identifiers === 'function';
-        var callingBack = typeof that.data.callback === 'function';
+        var lazyIdentifiers = typeof that.data.identifiers === "function";
+        var callingBack = typeof that.data.callback === "function";
         delegate(function () {
 
             if (lazyIdentifiers) {
@@ -118,7 +121,7 @@ var getErrorHandlingContinue = function (delegate) {
     var that = this;
     return function () {
 
-        var lazyError = typeof that.data.error === 'function';
+        var lazyError = typeof that.data.error === "function";
         delegate(lazyError ? that.data.error : () => that.data.error);
     };
 };
@@ -150,10 +153,10 @@ var OperationDelegateExecutive = function (options) {
 
             that.data.callback = callback;
         }
-        if (typeof parameters === 'boolean') {
+        if (typeof parameters === "boolean") {
 
             that.data.append = parameters;
-        } else if (typeof append === 'boolean') {
+        } else if (typeof append === "boolean") {
 
             that.data.append = append;
         }
@@ -174,9 +177,9 @@ var OperationDelegateExecutive = function (options) {
             append
         ] = arguments;
         var lazyQuery = !Array.isArray(queryOrObjects);
-        lazyQuery &= typeof that.data.query === 'function';
-        var lazyAggregate = typeof that.data.aggregate === 'function';
-        var lazyFilter = typeof that.data.filter === 'function';
+        lazyQuery &= typeof that.data.query === "function";
+        var lazyAggregate = typeof that.data.aggregate === "function";
+        var lazyFilter = typeof that.data.filter === "function";
         if (that.data.objects) {
 
             that.data.wrapper = that.data.objects;
@@ -197,10 +200,10 @@ var OperationDelegateExecutive = function (options) {
 
             that.data.callback = callback;
         }
-        if (typeof queryOrObjects === 'boolean') {
+        if (typeof queryOrObjects === "boolean") {
 
             that.data.append = queryOrObjects;
-        } else if (typeof append === 'boolean') {
+        } else if (typeof append === "boolean") {
 
             that.data.append = append;
         }

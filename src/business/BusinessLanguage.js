@@ -1,5 +1,5 @@
 /*jslint node: true */
-'use strict';
+"use strict";
 
 var getIfReturn = function () {
 
@@ -10,7 +10,7 @@ var getIfReturn = function () {
         begin: function () {
 
             var operations = arguments[0];
-            if (typeof operations === 'string') {
+            if (typeof operations === "string") {
 
                 operations = [operations];
             }
@@ -42,9 +42,9 @@ var getUseReturn = function () {
 
             for (var j = 0; j < arguments.length; j++) {
 
-                if (typeof arguments[j] !== 'function') {
+                if (typeof arguments[j] !== "function") {
 
-                    throw new Error('Invalid begin parameters');
+                    throw new Error("Invalid begin parameters");
                 }
             }
             begin = arguments;
@@ -53,13 +53,13 @@ var getUseReturn = function () {
         when: function () {
 
             var [operations, condition, options] = arguments;
-            var withoutCondition = typeof condition === 'object';
-            withoutCondition &= typeof options !== 'object';
+            var withoutCondition = typeof condition === "object";
+            withoutCondition &= typeof options !== "object";
             if (withoutCondition) options = condition;
             var useMiddlewareWhen = function (operation) {
 
                 var usedMiddlewares = middlewares[operation];
-                if (typeof options === 'object') {
+                if (typeof options === "object") {
 
                     var followingOrder = options.order > -1;
                     followingOrder &= options.order < usedMiddlewares.length;
@@ -80,8 +80,8 @@ var getUseReturn = function () {
                         return;
                     }
                 }
-                var withCondition = typeof condition === 'boolean';
-                withCondition |= typeof condition === 'function';
+                var withCondition = typeof condition === "boolean";
+                withCondition |= typeof condition === "function";
                 if (withCondition) {
 
                     useConditions[operations[i]] = condition;
@@ -96,9 +96,9 @@ var getUseReturn = function () {
             if (!Array.isArray(operations)) operations = [operations];
             for (var i = 0; i < operations.length; i++) {
 
-                if (typeof operations[i] !== 'string') {
+                if (typeof operations[i] !== "string") {
 
-                    throw new Error('Invalid operation key');
+                    throw new Error("Invalid operation key");
                 }
                 useMiddlewareWhen(operations[i]);
             }
@@ -125,11 +125,11 @@ var BusinessLanguage = function (options) {
     } = options;
     self.watch = function (operation, callback) {
 
-        var withoutOperation = typeof operation !== 'string';
-        var withoutCallback = typeof callback !== 'function';
+        var withoutOperation = typeof operation !== "string";
+        var withoutCallback = typeof callback !== "function";
         if (withoutOperation || withoutCallback) {
 
-            throw new Error('Invalid watch parameters');
+            throw new Error("Invalid watch parameters");
         }
         if (!watchers[operation]) watchers[operation] = [];
         watchers[operation].push(callback);
@@ -148,8 +148,8 @@ var BusinessLanguage = function (options) {
         if (arguments.length > 1) {
 
             var operations = arguments[0];
-            var oneOperation = typeof operations === 'string';
-            oneOperation &= typeof arguments[1] === 'function';
+            var oneOperation = typeof operations === "string";
+            oneOperation &= typeof arguments[1] === "function";
             var manyOperations = Array.isArray(operations);
             if (manyOperations) {
 
@@ -160,21 +160,21 @@ var BusinessLanguage = function (options) {
 
                 for (var i = 1; i < arguments.length; i++) {
 
-                    if (typeof arguments[i] !== 'function') {
+                    if (typeof arguments[i] !== "function") {
 
-                        throw new Error('Invalid delegate function');
+                        throw new Error("Invalid delegate function");
                     }
                     delegates[operations[i - 1]] = arguments[i];
                 }
-            } else throw new Error('Invalid begin parameters');
-        } else throw new Error('Invalid begin parameters');
+            } else throw new Error("Invalid begin parameters");
+        } else throw new Error("Invalid begin parameters");
         return self;
     };
     self.use = function (middleware) {
 
-        if (typeof middleware !== 'function') {
+        if (typeof middleware !== "function") {
 
-            throw new Error('Invalid behaviour middleware function');
+            throw new Error("Invalid behaviour middleware function");
         }
         var begin = null;
         return getUseReturn.apply(self, [

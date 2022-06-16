@@ -1,10 +1,10 @@
 /*jslint node: true */
-'use strict';
+"use strict";
 
-var { ServiceEndPoint } = require('./ServiceEndPoint.js');
-var { ServiceParameter } = require('./ServiceParameter.js');
-var { ServiceParameterType } = require('./ServiceParameter.js');
-var { ServiceObjectMapping } = require('./ServiceObjectMapping.js');
+var { ServiceEndPoint } = require("./ServiceEndPoint.js");
+var { ServiceParameter } = require("./ServiceParameter.js");
+var { ServiceParameterType } = require("./ServiceParameter.js");
+var { ServiceObjectMapping } = require("./ServiceObjectMapping.js");
 
 var encodeServiceParameters = function () {
 
@@ -12,7 +12,7 @@ var encodeServiceParameters = function () {
         serviceParameters,
         request
     ] = arguments;
-    request.method = 'GET';
+    request.method = "GET";
     for (var i = 0, q = 0; i < serviceParameters.length; i++) {
 
         var type = serviceParameters[i].type();
@@ -32,20 +32,20 @@ var encodeServiceParameters = function () {
                 request.method = value;
                 break;
             case ServiceParameterType.URIQUERY:
-                if (q++ > 0) request.path += '&';
-                else request.path += '?';
+                if (q++ > 0) request.path += "&";
+                else request.path += "?";
                 request.path += key;
-                request.path += '=';
+                request.path += "=";
                 request.path += encodeURIComponent(value);
                 break;
             case ServiceParameterType.URIPARAMETER:
                 request.path = request.path.replace(...[
-                    ':' + key,
+                    ":" + key,
                     encodeURIComponent(value)
                 ]);
                 break;
             default:
-                throw new Error('Invalid service paramater');
+                throw new Error("Invalid service paramater");
         }
     }
 };
@@ -76,12 +76,12 @@ var getQueryByIDCallback = function () {
 
             var next = function () {
 
-                var continuing = index + 1 < serviceObjects.length;
+                var continuing = (index + 1) < serviceObjects.length;
                 var saving = index % 1000 === 0;
-                saving |= index === serviceObjects.length - 1;
+                saving |= index === (serviceObjects.length - 1);
                 if (modelEntity && saving) {
 
-                    var validSave = typeof save === 'function';
+                    var validSave = typeof save === "function";
                     if (validSave) save(function () {
 
                         if (continuing) queryByID(...[
@@ -93,7 +93,7 @@ var getQueryByIDCallback = function () {
                             serviceObjectMapping,
                             modelEntity
                         ]); else callback();
-                    }); else throw new Error('Invalid save function');
+                    }); else throw new Error("Invalid save function");
                 } else if (continuing) queryByID(...[
                     index + 1,
                     serviceObjects,
@@ -104,14 +104,14 @@ var getQueryByIDCallback = function () {
                     modelEntity
                 ]); else callback();
             };
-            if (modelEntity && op === 'insert') {
+            if (modelEntity && op === "insert") {
 
-                var adding = typeof addObjects === 'function';
+                var adding = typeof addObjects === "function";
                 if (adding) addObjects(...[
                     [modelObject],
                     modelEntity,
                     () => next()
-                ]); else throw new Error('Invalid add objects function');
+                ]); else throw new Error("Invalid add objects function");
             } else next();
         }
     ]);
@@ -143,7 +143,7 @@ var queryByID = function () {
         ]);
         if (idServiceValue) {
 
-            var identifying = typeof getObjectsByID === 'function';
+            var identifying = typeof getObjectsByID === "function";
             if (identifying) getObjectsByID(...[
                 objectMetadata.id,
                 idServiceValue,
@@ -191,11 +191,11 @@ var mapAndSync = function () {
         createModelEntity,
         objectAttributesMethod
     } = options;
-    var mapping_syncing = serviceObjects;
-    mapping_syncing &= objectMetadata;
+    var mapping_syncing = !!serviceObjects;
+    mapping_syncing &= !!objectMetadata;
     if (mapping_syncing) {
 
-        mapping_syncing &= objectMetadata.model;
+        mapping_syncing &= !!objectMetadata.model;
     }
     if (mapping_syncing) {
 
@@ -205,7 +205,7 @@ var mapAndSync = function () {
 
         var modelEntity = null;
         var many = objectMetadata.model.length > 0;
-        var creating = typeof createModelEntity === 'function';
+        var creating = typeof createModelEntity === "function";
         if (many && creating) modelEntity = createModelEntity(...[
             objectMetadata.model
         ]);
@@ -213,20 +213,20 @@ var mapAndSync = function () {
 
             if (!creating) {
 
-                throw new Error('Invalid create entity function');
+                throw new Error("Invalid create entity function");
             } else if (!modelEntity) {
 
-                throw new Error('Invalid entity name');
+                throw new Error("Invalid entity name");
             } else {
 
-                var invalidMethod = typeof objectAttributesMethod !== 'string';
+                var invalidMethod = typeof objectAttributesMethod !== "string";
                 if (!invalidMethod) {
 
                     invalidMethod |= !modelEntity[objectAttributesMethod];
                 }
                 if (invalidMethod) {
 
-                    throw new Error('Invalid object attributes method name');
+                    throw new Error("Invalid object attributes method name");
                 }
             }
         }
@@ -256,11 +256,11 @@ var reflectOnModel = function () {
     if (Array.isArray(response)) serviceObjects = response;
     else {
 
-        var extracting = typeof response === 'object';
-        extracting &= objectMetadata;
+        var extracting = typeof response === "object";
+        extracting &= !!objectMetadata;
         if (extracting) {
 
-            extracting &= typeof objectMetadata.name === 'string';
+            extracting &= typeof objectMetadata.name === "string";
         }
         if (extracting) {
 
@@ -268,7 +268,7 @@ var reflectOnModel = function () {
             if (path.length === 0) serviceObjects = [response];
             else {
 
-                var components = path.split('.');
+                var components = path.split(".");
                 var res = response;
                 for (var i = 0; i < components.length && res; i++) {
 
@@ -302,10 +302,10 @@ var createRequest = function () {
         var [servicePrameter] = arguments;
         return !(servicePrameter instanceof ServiceParameter);
     }))
-        throw new Error('Invalid service paramaters');
+        throw new Error("Invalid service paramaters");
     if (!(serviceEndPoint instanceof ServiceEndPoint)) {
 
-        throw new Error('Invalid service endpoint');
+        throw new Error("Invalid service endpoint");
     }
     var request = {
 
@@ -327,7 +327,7 @@ var createRequest = function () {
             serviceEndPoint.responseMetadata,
             function (serviceObjects) {
 
-                var callingBack = typeof callback === 'function';
+                var callingBack = typeof callback === "function";
                 if (callingBack) callback(...[
                     serviceObjects ||
                     response,
@@ -354,7 +354,7 @@ module.exports.ServiceController = function (options) {
         serviceAdapter = createRequest(...[
             servicePrameters,
             serviceEndPoint,
-            'authentication',
+            "authentication",
             callback,
             serviceAdapter,
             options
@@ -370,7 +370,7 @@ module.exports.ServiceController = function (options) {
         serviceAdapter = createRequest(...[
             servicePrameters,
             serviceEndPoint,
-            'request',
+            "request",
             callback,
             serviceAdapter,
             options

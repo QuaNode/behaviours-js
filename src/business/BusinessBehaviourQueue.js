@@ -1,5 +1,5 @@
 /*jslint node: true */
-'use strict';
+"use strict";
 
 var getCancelFunc = function () {
 
@@ -25,14 +25,14 @@ var getCancelFunc = function () {
         });
         if (executingBehaviourQueue.indexOf(behaviour) > -1) {
 
-            var cancelling = typeof cancelExecutingBehaviour === 'function';
+            var cancelling = typeof cancelExecutingBehaviour === "function";
             if (cancelling) cancelExecutingBehaviour(...[
                 behaviour
             ]);
         } else if (behaviourQueue.indexOf(behaviour) > -1) self.dequeue(...[
             behaviour,
             ignoreSetComplete,
-            'cancelled'
+            "cancelled"
         ]);
     };
 };
@@ -48,21 +48,21 @@ var getCompletionObject = function (completionDelegate) {
         },
         apply: function (success, dependentBehaviours) {
 
-            if (typeof success === 'boolean') this.data.success = success;
+            if (typeof success === "boolean") this.data.success = success;
             if (dependentBehaviours) {
 
                 this.data.dependentBehaviours = dependentBehaviours;
             }
             completionDelegate(function () {
 
-                if (typeof this.data.success === 'function') {
+                if (typeof this.data.success === "function") {
 
                     return this.data.success.apply(null, arguments);
                 }
                 return this.data.success;
             }, function () {
 
-                if (typeof this.data.dependentBehaviours === 'function') {
+                if (typeof this.data.dependentBehaviours === "function") {
 
                     return this.data.dependentBehaviours.apply(...[
                         null,
@@ -125,8 +125,18 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
 
             var shouldEnqueue = i < 0;
             var currentBehaviour = shouldEnqueue ? null : behaviourQueue[i];
-            shouldEnqueue |= currentBehaviour.hasMandatoryBehaviour(behaviour);
-            shouldEnqueue |= currentBehaviour.priority < behaviour.priority;
+            if (!shouldEnqueue) {
+
+                var {
+                    hasMandatoryBehaviour,
+                    priority
+                } = currentBehaviour;
+                shouldEnqueue |= hasMandatoryBehaviour.apply(...[
+                    currentBehaviour,
+                    [behaviour]
+                ]);
+                shouldEnqueue |= priority < behaviour.priority;
+            }
             if (shouldEnqueue) {
 
                 behaviourQueue.splice(i + 1, 0, behaviour);
@@ -157,10 +167,10 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
             var completionDelegate = function () {
 
                 var [isSuccess, getDependentBehaviours] = arguments;
-                var success = typeof isSuccess === 'function';
+                var success = typeof isSuccess === "function";
                 if (success) success = isSuccess();
                 var dependentBehaviours = [];
-                if (typeof getDependentBehaviours === 'function') {
+                if (typeof getDependentBehaviours === "function") {
 
                     dependentBehaviours = getDependentBehaviours();
                 }
@@ -176,15 +186,15 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
                     if (shouldDequeue) self.dequeue(...[
                         executingBehaviour,
                         false,
-                        'failed'
+                        "failed"
                     ]);
                 });
             };
             var completing = !ignoreSetComplete;
-            completing &= typeof setComplete === 'function';
+            completing &= typeof setComplete === "function";
             if (completing) setTimeout(function () {
 
-                if (typeof setError === 'function' && error) {
+                if (typeof setError === "function" && error) {
 
                     setError(currentBehaviour, error);
                 }

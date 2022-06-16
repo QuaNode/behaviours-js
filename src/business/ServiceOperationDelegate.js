@@ -1,9 +1,9 @@
 /*jslint node: true */
 /*jshint esversion: 6 */
-'use strict';
+"use strict";
 
-var { OperationType } = require('./BusinessBehaviourCycle.js');
-var { ServiceController } = require('../service/ServiceController.js');
+var { OperationType } = require("./BusinessBehaviourCycle.js");
+var { ServiceController } = require("../service/ServiceController.js");
 
 var getRequestDelegate = function () {
 
@@ -24,35 +24,35 @@ var getRequestDelegate = function () {
         var SERVICEOPERATION = serviceOperation.toUpperCase();
         if (SERVICEOPERATION == OperationType.FETCH.toUpperCase()) {
 
-            throw new Error('Missing or invalid fetch behaviour');
+            throw new Error("Missing or invalid fetch behaviour");
         }
         if (!self.serviceController) {
 
-            throw new Error('No service controller for online behaviour');
+            throw new Error("No service controller for online behaviour");
         }
         for (var i = 0; i < serviceOperations.length; i++) {
 
             var method = serviceMethods[serviceOperations[i]];
-            if (typeof self.serviceController[method] !== 'function') {
+            if (typeof self.serviceController[method] !== "function") {
 
-                throw new Error('Invalid service method');
+                throw new Error("Invalid service method");
             }
         }
         var requestHandler = function (serviceObjects, error) {
 
-            var callingBack = typeof setServiceObjects === 'function';
+            var callingBack = typeof setServiceObjects === "function";
             if (callingBack) {
 
-                callingBack &= setServiceObjects(serviceObjects, error);
+                callingBack &= !!setServiceObjects(serviceObjects, error);
             }
-            if (callingBack) callingBack &= serviceObjects
+            if (callingBack) callingBack &= !!serviceObjects
             if (callingBack) callback(serviceObjects, error);
             else callback(null, error);
         };
-        var sp = typeof getServiceParameters === 'function';
+        var sp = typeof getServiceParameters === "function";
         if (sp) sp = getServiceParameters();
         else sp = [];
-        if (typeof getEndPoint === 'function') {
+        if (typeof getEndPoint === "function") {
 
             var ep = getEndPoint();
             var method = serviceMethods[serviceOperation];
@@ -78,28 +78,28 @@ var getFetchDelegate = function () {
         ] = arguments;
         if (!self.resourceController) {
 
-            throw new Error('No resource controller for fetch behaviour');
+            throw new Error("No resource controller for fetch behaviour");
         }
-        if (typeof self.resourceController[fetchMethod] !== 'function') {
+        if (typeof self.resourceController[fetchMethod] !== "function") {
 
-            throw new Error('Invalid fetch method');
+            throw new Error("Invalid fetch method");
         }
         var resource = null;
         var fetchHandler = function (updated_resource, error) {
 
-            var callingBack = typeof setResourceInfo === 'function';
+            var callingBack = typeof setResourceInfo === "function";
             if (callingBack) {
 
-                callingBack &= setResourceInfo(resource, error);
+                callingBack &= !!setResourceInfo(resource, error);
             }
-            callingBack &= updated_resource;
+            callingBack &= !!updated_resource;
             if (callingBack) callback(updated_resource, error);
             else callback(null, error);
         };
-        var stream = typeof getStream === 'function';
+        var stream = typeof getStream === "function";
         if (stream) stream = getStream();
         else stream = undefined;
-        if (typeof getResourceInfo === 'function') {
+        if (typeof getResourceInfo === "function") {
 
             resource = getResourceInfo();
             var cancel = self.resourceController[fetchMethod](...[
@@ -107,7 +107,7 @@ var getFetchDelegate = function () {
                 stream,
                 fetchHandler
             ]);
-            if (typeof setCancel === 'function') setCancel(cancel);
+            if (typeof setCancel === "function") setCancel(cancel);
         } else fetchHandler();
     };
 };
@@ -120,17 +120,17 @@ var getObjectsByIDFunc = function (modelController, options) {
             QueryExpression,
             ComparisonOperators
         } = options;
-        var queryByID = typeof QueryExpression === 'function';
+        var queryByID = typeof QueryExpression === "function";
         if (queryByID) queryByID = [new QueryExpression({
 
             fieldName: id,
             comparisonOperator: ComparisonOperators && ComparisonOperators.EQUAL,
             fieldValue: value
         })];
-        var gettingObjects = modelController;
+        var gettingObjects = !!modelController;
         if (gettingObjects) {
 
-            gettingObjects &= typeof modelController.getObjects === 'function';
+            gettingObjects &= typeof modelController.getObjects === "function";
         }
         if (gettingObjects) modelController.getObjects(...[
             queryByID,
@@ -170,7 +170,7 @@ var ServiceOperationDelegate = function (options) {
                 getObjectsByID: getObjectsByIDFunc(modelController, options),
                 addObjects: modelController && modelController.addObjects,
                 save: modelController && modelController.save,
-                objectAttributesMethod: 'getObjectAttributes'
+                objectAttributesMethod: "getObjectAttributes"
             }
         }
         serviceController = new ServiceController(serviceControllerOptions);
@@ -178,16 +178,16 @@ var ServiceOperationDelegate = function (options) {
     if (!getServiceMethods) getServiceMethods = function (index) {
 
         var methods = [
-            'request',
-            'authenticate'
+            "request",
+            "authenticate"
         ];
         return index === undefined ? methods : methods[index];
     };
-    if (!fetchMethod) fetchMethod = 'loadResource';
+    if (!fetchMethod) fetchMethod = "loadResource";
     var serviceMethods = {};
     if (serviceController) {
 
-        var invalidMethods = typeof getServiceMethods !== 'function';
+        var invalidMethods = typeof getServiceMethods !== "function";
         if (!invalidMethods) {
 
             invalidMethods |= !Array.isArray(getServiceMethods());
@@ -196,7 +196,7 @@ var ServiceOperationDelegate = function (options) {
 
             invalidMethods |= getServiceMethods().length < 2;
         }
-        if (invalidMethods) throw new Error('Invalid service methods');
+        if (invalidMethods) throw new Error("Invalid service methods");
         for (var i = 0; i < serviceOperations.length; i++) {
 
             var method = getServiceMethods(i, serviceOperations[i]);
@@ -205,9 +205,9 @@ var ServiceOperationDelegate = function (options) {
     }
     if (resourceController) {
 
-        if (typeof fetchMethod !== 'string') {
+        if (typeof fetchMethod !== "string") {
 
-            throw new Error('Invalid fetch methods');
+            throw new Error("Invalid fetch methods");
         }
     }
     self.serviceController = serviceController;

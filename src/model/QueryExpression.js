@@ -1,5 +1,5 @@
 /*jslint node: true */
-'use strict';
+"use strict";
 
 var LogicalOperators = null;
 
@@ -7,9 +7,9 @@ var ComparisonOperators = null;
 
 module.exports.setComparisonOperators = function (co) {
 
-    if (typeof co !== 'object') {
+    if (typeof co !== "object") {
 
-        throw new Error('Invalid comparison operators');
+        throw new Error("Invalid comparison operators");
     }
     ComparisonOperators = co;
     module.exports.ComparisonOperators = ComparisonOperators;
@@ -17,9 +17,9 @@ module.exports.setComparisonOperators = function (co) {
 
 module.exports.setLogicalOperators = function (lo) {
 
-    if (typeof lo !== 'object') {
+    if (typeof lo !== "object") {
 
-        throw new Error('Invalid logical operators');
+        throw new Error("Invalid logical operators");
     }
     LogicalOperators = lo;
     module.exports.LogicalOperators = LogicalOperators;
@@ -45,19 +45,20 @@ var QueryExpression = function (options) {
     var self = this;
     if (!ComparisonOperators) {
 
-        throw new Error('Set comparison operators before' +
-            ' using query expression');
+        throw new Error("Set comparison operators before" +
+            " using query expression");
     }
     if (!LogicalOperators) {
 
-        throw new Error('Set logical operators before using' +
-            ' query expression');
+        throw new Error("Set logical operators before using" +
+            " query expression");
     }
     var {
         comparisonOperator,
         comparisonOperatorOptions,
         logicalOperator,
         fieldName,
+        fieldValue,
         contextualLevel
     } = options;
     if (!isValidOperator(...[
@@ -65,18 +66,18 @@ var QueryExpression = function (options) {
         comparisonOperator
     ])) {
 
-        throw new Error('The comparison operator is not one of' +
-            ' the allowed comparison operators, please use' +
-            ' ComparisonOperators');
+        throw new Error("The comparison operator is not one of" +
+            " the allowed comparison operators, please use" +
+            " ComparisonOperators");
     }
     if (logicalOperator && !isValidOperator(...[
         LogicalOperators,
         logicalOperator
     ])) {
 
-        throw new Error('The logical operator is not one of the' +
-            ' allowed logical operators, please use' +
-            ' LogicalOperators');
+        throw new Error("The logical operator is not one of the" +
+            " allowed logical operators, please use" +
+            " LogicalOperators");
     }
     self.fieldName = fieldName;
     self.comparisonOperator = comparisonOperator;

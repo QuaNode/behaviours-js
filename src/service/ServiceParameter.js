@@ -1,26 +1,26 @@
 /*jslint node: true */
-'use strict';
+"use strict";
 
 var ServiceParameterKey = {
 
-    USERNAME: 'username',
-    PASSWORD: 'password',
-    ACCEPT: 'Accept',
-    RESOURCE: 'resource',
-    REQUEST_DIGEST: 'X-RequestDigest',
-    META_DATA: '__metadata',
-    CONTENT_TYPE: 'Content-Type',
-    IF_MATCH: 'IF-MATCH',
-    X_HTTP_METHOD: 'X-Http-Method'
+    USERNAME: "username",
+    PASSWORD: "password",
+    ACCEPT: "Accept",
+    RESOURCE: "resource",
+    REQUEST_DIGEST: "X-RequestDigest",
+    META_DATA: "__metadata",
+    CONTENT_TYPE: "Content-Type",
+    IF_MATCH: "IF-MATCH",
+    X_HTTP_METHOD: "X-Http-Method"
 };
 
 var ServiceParameterType = {
 
-    BODY: 'body',
-    HEADER: 'header',
-    METHOD: 'method',
-    URIQUERY: 'uriquery',
-    URIPARAMETER: 'uriparameter'
+    BODY: "body",
+    HEADER: "header",
+    METHOD: "method",
+    URIQUERY: "uriquery",
+    URIPARAMETER: "uriparameter"
 };
 
 module.exports.ServiceParameter = function (options) {
@@ -58,7 +58,7 @@ module.exports.ServiceParameter = function (options) {
                     type = typeParameter;
                     break;
                 default:
-                    throw new Error('Invalid service parameter type');
+                    throw new Error("Invalid service parameter type");
             }
         }
     };

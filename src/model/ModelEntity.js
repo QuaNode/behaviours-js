@@ -1,5 +1,5 @@
 /*jslint node: true */
-'use strict';
+"use strict";
 
 var ModelEntities = {};
 
@@ -13,11 +13,11 @@ module.exports.ModelEntity = function (options) {
         query,
         aggregate
     } = options;
-    var invalidOptions = typeof constructor !== 'function';
-    invalidOptions |= typeof attributes !== 'object';
+    var invalidOptions = typeof constructor !== "function";
+    invalidOptions |= typeof attributes !== "object";
     if (features !== undefined) {
 
-        invalidOptions |= typeof features !== 'object';
+        invalidOptions |= typeof features !== "object";
     }
     if (aggregate !== undefined) {
 
@@ -27,7 +27,7 @@ module.exports.ModelEntity = function (options) {
 
         invalidOptions |= !Array.isArray(query);
     }
-    if (invalidOptions) throw new Error('Invalid entity options');
+    if (invalidOptions) throw new Error("Invalid entity options");
     self.getObjectConstructor = () => constructor;
     self.getObjectAttributes = () => attributes;
     self.getObjectFeatures = () => features;
@@ -41,16 +41,16 @@ module.exports.ModelEntity.registerModelEntity = function (options) {
         entity,
         entityName
     } = options;
-    var validEntity = typeof entity === 'function';
-    var validName = typeof entityName === 'string';
+    var validEntity = typeof entity === "function";
+    var validName = typeof entityName === "string";
     if (validName) validName &= entityName.length > 0;
     if (validName && ModelEntities[entityName]) {
 
-        throw new Error('Entity with same name already' +
-            ' registered: ' + entityName);
+        throw new Error("Entity with same name already" +
+            " registered: " + entityName);
     }
     if (validEntity && validName) ModelEntities[entityName] = entity;
-    else throw new Error('Invalid entity parameters');
+    else throw new Error("Invalid entity parameters");
 };
 
 module.exports.ModelEntity.createModelEntity = function () {

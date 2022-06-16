@@ -1,15 +1,15 @@
 /*jslint node: true */
 /*jshint esversion: 6 */
-'use strict';
+"use strict";
 
-var { OperationDelegateExecutive } = require('./OperationDelegateExecutive.js');
-var { BusinessOperation } = require('./BusinessBehaviourCycle.js');
-var parse = require('parseparams');
+var { OperationDelegateExecutive } = require("./OperationDelegateExecutive.js");
+var { BusinessOperation } = require("./BusinessBehaviourCycle.js");
+var parse = require("parseparams");
 
 var ifCondition = function (operation, conditions) {
 
-    var lazy = typeof conditions[operation] === 'function';
-    var scalar = typeof conditions[operation] === 'boolean';
+    var lazy = typeof conditions[operation] === "function";
+    var scalar = typeof conditions[operation] === "boolean";
     if (lazy && !conditions[operation]()) return false;
     else if (scalar && !conditions[operation]) return false;
     return true;
@@ -25,12 +25,15 @@ var middleware = function () {
         middlewares,
         useConditions
     ] = arguments;
-    var middling = middlewares[operation];
+    var middling = !!middlewares[operation];
     middling &= index > -1;
-    middling &= index < middlewares[operation].length;
+    if (middling) {
+
+        middling &= index < middlewares[operation].length;
+    }
     if (middling && ifCondition(operation, useConditions)) {
 
-        var async = parse(middlewares[operation][index])[2] === 'next';
+        var async = parse(middlewares[operation][index])[2] === "next";
         if (async) middlewares[operation][index](...[
             operation,
             businessController,
@@ -98,12 +101,12 @@ var getServiceOperation = function () {
                 append
             ]);
         },
-        parameters: getOperationFunc('parameters'),
-        resource: getOperationFunc('parameters'),
-        service: getOperationFunc('service'),
-        stream: getOperationFunc('service'),
-        append: getOperationFunc('append'),
-        callback: getOperationFunc('callback'),
+        parameters: getOperationFunc("parameters"),
+        resource: getOperationFunc("parameters"),
+        service: getOperationFunc("service"),
+        stream: getOperationFunc("service"),
+        append: getOperationFunc("append"),
+        callback: getOperationFunc("callback"),
         cancel: getOperationCancelFunc(delegate)
     };
 };
@@ -141,13 +144,13 @@ var getModelOperation = function () {
                 append
             ]);
         },
-        objects: getOperationFunc('objects'),
-        query: getOperationFunc('query'),
-        aggregate: getOperationFunc('aggregate'),
-        filter: getOperationFunc('filter'),
-        entity: getOperationFunc('entity'),
-        append: getOperationFunc('append'),
-        callback: getOperationFunc('callback'),
+        objects: getOperationFunc("objects"),
+        query: getOperationFunc("query"),
+        aggregate: getOperationFunc("aggregate"),
+        filter: getOperationFunc("filter"),
+        entity: getOperationFunc("entity"),
+        append: getOperationFunc("append"),
+        callback: getOperationFunc("callback"),
         cancel: getOperationCancelFunc(delegate)
     };
 };
@@ -176,7 +179,7 @@ var getServiceMappingOperation = function () {
                 callback
             ]);
         },
-        callback: getOperationFunc('callback'),
+        callback: getOperationFunc("callback"),
         cancel: getOperationCancelFunc(delegate)
     };
 };
@@ -207,8 +210,8 @@ var getModelMappingOperation = function () {
                 callback
             ]);
         },
-        identifiers: getOperationFunc('identifiers'),
-        callback: getOperationFunc('callback'),
+        identifiers: getOperationFunc("identifiers"),
+        callback: getOperationFunc("callback"),
         cancel: getOperationCancelFunc(delegate)
     };
 };
@@ -237,7 +240,7 @@ var getErrorHandlingOperation = function () {
                 error
             ]);
         },
-        error: getOperationFunc('error'),
+        error: getOperationFunc("error"),
         cancel: getOperationCancelFunc(delegate)
     };
 };

@@ -1,15 +1,15 @@
 /*jslint node: true */
 /*jshint esversion: 6 */
-'use strict';
+"use strict";
 
-var { BusinessBehaviour } = require('./BusinessBehaviour.js');
-var { BusinessBehaviourTypes } = require('./BusinessBehaviour.js');
-var { ModelOperationDelegate } = require('./ModelOperationDelegate.js');
-var { ServiceOperationDelegate } = require('./ServiceOperationDelegate.js');
-var { BusinessOperationDelegate } = require('./BusinessOperationDelegate.js');
-var { BusinessBehaviourQueue } = require('./BusinessBehaviourQueue.js');
-var { BusinessBehaviourCycle } = require('./BusinessBehaviourCycle.js');
-var { BusinessDelegator } = require('./BusinessDelegator.js');
+var { BusinessBehaviour } = require("./BusinessBehaviour.js");
+var { BusinessBehaviourType } = require("./BusinessBehaviour.js");
+var { ModelOperationDelegate } = require("./ModelOperationDelegate.js");
+var { ServiceOperationDelegate } = require("./ServiceOperationDelegate.js");
+var { BusinessOperationDelegate } = require("./BusinessOperationDelegate.js");
+var { BusinessBehaviourQueue } = require("./BusinessBehaviourQueue.js");
+var { BusinessBehaviourCycle } = require("./BusinessBehaviourCycle.js");
+var { BusinessDelegator } = require("./BusinessDelegator.js");
 
 var BusinessController = function (options) {
 
@@ -38,7 +38,7 @@ var BusinessController = function (options) {
     var { operationCallback } = options;
     if (FetchBehaviour && !(FetchBehaviour.prototype instanceof BusinessBehaviour)) {
 
-        throw new Error('Invalid fetch behaviour type');
+        throw new Error("Invalid fetch behaviour type");
     }
     var modelOperationDelegate = new ModelOperationDelegate({
 
@@ -83,7 +83,7 @@ var BusinessController = function (options) {
         businessController: self,
         serviceOperations: serviceOperations,
         modelOperations: modelOperations,
-        BusinessBehaviourTypes: BusinessBehaviourTypes,
+        BusinessBehaviourType: BusinessBehaviourType,
         businessBehaviourQueue: businessBehaviourQueue,
         delegateServiceOperation: delegateServiceOperation,
         delegateModelOperation: delegateModelOperation,
@@ -103,7 +103,7 @@ var BusinessController = function (options) {
 
         if (!(behaviour instanceof BusinessBehaviour)) {
 
-            throw new Error('Invalid behaviour');
+            throw new Error("Invalid behaviour");
         }
         var ignoring = ignoreBehaviours
         ignoring |= businessBehaviourQueue.isEnqueued(...[

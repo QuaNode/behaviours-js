@@ -1,4 +1,4 @@
-# behaviours-js
+# behaviours-js [![Codacy Badge](https://app.codacy.com/project/badge/Grade/b4680544631e4c5fa1aed0e54f607b99)](https://www.codacy.com/gh/QuaNode/behaviours-js/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=QuaNode/behaviours-js&amp;utm_campaign=Badge_Grade)
 
 Behaviours framework written in JavaScript implementing [Behaviour-first-design](https://github.com/ahmedragab/Behaviour-first-design/wiki) and queue-map architecture.
 
@@ -11,13 +11,13 @@ npm install behaviours-js
 ## Usage
 
 ```js
-var ( BusinessController, BehaviourConstructor, ModelEntity, QueryExpression } = require('behaviours-js');
-var define = require('define-js');
+var ( BusinessController, BehaviourConstructor, ModelEntity, QueryExpression } = require("behaviours-js");
+var define = require("define-js");
 
 // 1: define data controller
 var ComparisonOperators = {
-    EQUAL: '=',
-    NE: '$ne'
+    EQUAL: "=",
+    NE: "$ne"
 };
 backend.setComparisonOperators(ComparisonOperators);
 var ModelController = function () {
@@ -44,7 +44,7 @@ ModelController.prototype.constructor = ModelController;
 var Schema = {
   id: Number
 }
-var EntityConstructor = ModelController.defineEntity('entity name', Schema);
+var EntityConstructor = ModelController.defineEntity("entity name", Schema);
 var Entity = define(function (init) {
     return function (features, query, aggregate) {
         init.apply(this, [{
@@ -58,7 +58,7 @@ var Entity = define(function (init) {
 });
 ModelEntity.registerModelEntity({
     entity: Entity,
-    entityName: 'entity name'
+    entityName: "entity name"
 });
 
 // 3: define behaviour
@@ -67,15 +67,15 @@ var MyBehaviour = define(function (init) {
         var self = init.apply(this, arguments).self();
         var goal = null;
         var error = null;
-        self.begin('ErrorHandling', function (key, businessController, operation) {
+        self.begin("ErrorHandling", function (key, businessController, operation) {
             operation.error(function (e) {
                 return error || e;
             }).apply();
         });
         // validate self.inputObjects
-        self.begin('Query', function (key, businessController, operation) {
+        self.begin("Query", function (key, businessController, operation) {
             operation.query([new QueryExpression({
-                fieldName: 'id',
+                fieldName: "id",
                 comparisonOperator: ComparisonOperators.EQUAL,
                 fieldValue: self.inputObjects.id
             })]).entity(new Entity({
@@ -84,7 +84,7 @@ var MyBehaviour = define(function (init) {
                 if (e) error = e;
                 goal = models;
             }).apply();
-        }).begin('ModelObjectMapping', function (key, businessController, operation) {
+        }).begin("ModelObjectMapping", function (key, businessController, operation) {
             operation.callback(function (output) {
                 output.goal = goal;
             }).apply();
@@ -94,7 +94,7 @@ var MyBehaviour = define(function (init) {
     type: 1
 });
 var behaviour = new MyBehaviour({
-    name: 'behaviour name',
+    name: "behaviour name",
     type: 1, // 0: the behaviour will read data from external service
              // 1: it will read data from internal db
              // 2: it will write data to external service

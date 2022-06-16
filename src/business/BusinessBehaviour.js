@@ -1,11 +1,11 @@
 /*jslint node: true */
 /*jshint esversion: 6 */
-'use strict';
+"use strict";
 
-var copy = require('shallow-copy');
-var { BusinessBehaviourCore } = require('./BusinessBehaviourCore.js');
-var { BusinessLanguage } = require('./BusinessLanguage.js');
-var define = require('define-js');
+var copy = require("shallow-copy");
+var { BusinessBehaviourCore } = require("./BusinessBehaviourCore.js");
+var { BusinessLanguage } = require("./BusinessLanguage.js");
+var define = require("define-js");
 
 var BusinessBehaviourType = {
 
@@ -19,9 +19,9 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
 
     return function (options) {
 
-        if (typeof options !== 'object') {
+        if (typeof options !== "object") {
 
-            throw new Error('Invalid behaviour parameters');
+            throw new Error("Invalid behaviour parameters");
         }
         var languageParameters = {
 
@@ -62,7 +62,7 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
                     }
                 }
             }
-            throw new Error('Invalid behaviour type');
+            throw new Error("Invalid behaviour type");
         };
         self.setType(options.type);
         self.prepareOperations = function () {
@@ -84,7 +84,7 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
                     ...modelOperations
                 ].indexOf(delegate) === -1) {
 
-                    throw new Error('Invalid operation name: ' + delegate);
+                    throw new Error("Invalid operation name: " + delegate);
                 }
             });
         };

@@ -1,10 +1,10 @@
 /*jslint node: true */
 /*jshint esversion: 6 */
-'use strict';
+"use strict";
 
-var { BusinessBehaviourType: BehaviourTypes } = require('./BusinessBehaviour.js');
-var { BusinessOperation } = require('./BusinessBehaviourCycle.js');
-var { OperationType } = require('./BusinessBehaviourCycle.js');
+var { BusinessBehaviourType: BehaviourTypes } = require("./BusinessBehaviour.js");
+var { BusinessOperation } = require("./BusinessBehaviourCycle.js");
+var { OperationType } = require("./BusinessBehaviourCycle.js");
 
 var getFetchCallback = function () {
 
@@ -21,7 +21,7 @@ var getFetchCallback = function () {
             resource.path
         ];
         if (error) currentBehaviour.state.error = error;
-        var callingBack = typeof operationCallback === 'function';
+        var callingBack = typeof operationCallback === "function";
         if (callingBack) operationCallback({
 
             behaviour: currentBehaviour.name,
@@ -62,7 +62,7 @@ var getRequestCallback = function () {
             ]); else state.serviceObjects.push(serviceObjects);
         }
         if (error) state.error = error;
-        var callingBack = typeof operationCallback === 'function';
+        var callingBack = typeof operationCallback === "function";
         if (callingBack) operationCallback({
 
             behaviour: currentBehaviour.name,
@@ -95,7 +95,7 @@ var getManipulateCallback = function () {
             ]); else state.modelObjects.push(modelObjects);
         }
         if (error) state.error = error;
-        var callingBack = typeof operationCallback === 'function';
+        var callingBack = typeof operationCallback === "function";
         if (callingBack) operationCallback({
 
             behaviour: currentBehaviour.name,
@@ -116,7 +116,7 @@ var getMapFromCallback = function () {
     ] = arguments;
     return function () {
 
-        var callingBack = typeof operationCallback === 'function';
+        var callingBack = typeof operationCallback === "function";
         if (callingBack) operationCallback({
 
             behaviour: currentBehaviour.name,
@@ -136,7 +136,7 @@ var getMappingCallback = function () {
     ] = arguments;
     return function (businessObjects) {
 
-        var callingBack = typeof operationCallback === 'function';
+        var callingBack = typeof operationCallback === "function";
         if (callingBack) operationCallback({
 
             behaviour: currentBehaviour.name,
@@ -281,7 +281,7 @@ var BusinessDelegator = function (options) {
 
 BusinessDelegator.prototype.cancelRunningBehaviour = function (behaviour) {
 
-    if (typeof behaviour.cancel === 'function') {
+    if (typeof behaviour.cancel === "function") {
 
         behaviour.cancel();
         behaviour.cancel = null;

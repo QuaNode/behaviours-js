@@ -1,37 +1,37 @@
 /*jslint node: true */
-'use strict';
+"use strict";
 
-var debug = require('debug')('backend:BusinessBehaviourCycle');
+var debug = require("debug")("backend:BusinessBehaviourCycle");
 
 var BusinessOperation = {
 
-    SERVICEOBJECTMAPPING: 'ServiceObjectMapping',
-    MODELOBJECTMAPPING: 'ModelObjectMapping',
-    ERRORHANDLING: 'ErrorHandling'
+    SERVICEOBJECTMAPPING: "ServiceObjectMapping",
+    MODELOBJECTMAPPING: "ModelObjectMapping",
+    ERRORHANDLING: "ErrorHandling"
 };
 
 var ServiceOperation = {
 
-    AUTHENTICATION: 'Authentication',
-    FETCH: 'Fetch',
-    REQUEST: 'Request'
+    AUTHENTICATION: "Authentication",
+    FETCH: "Fetch",
+    REQUEST: "Request"
 };
 
 var ModelOperation = {
 
-    QUERY: 'Query',
-    DELETE: 'Delete',
-    INSERT: 'Insert'
+    QUERY: "Query",
+    DELETE: "Delete",
+    INSERT: "Insert"
 };
 
 var OperationType = {
 
-    FETCH: 'fetch',
-    REQUEST: 'request',
-    MANIPULATE: 'manipulate',
-    MAPFROM: 'mapfrom',
-    MAPTO: 'mapto',
-    MAPBETWEEN: 'mapbetween'
+    FETCH: "fetch",
+    REQUEST: "request",
+    MANIPULATE: "manipulate",
+    MAPFROM: "mapfrom",
+    MAPTO: "mapto",
+    MAPBETWEEN: "mapbetween"
 };
 
 var validateServiceOperations = function (serviceOperations) {
@@ -80,7 +80,7 @@ var endRunningBehaviour = function (currentBehaviour, options) {
     if (businessBehaviourQueue.suspend(currentBehaviour)) return;
     var businessDelegate = function (getError) {
 
-        if (typeof getError === 'function') {
+        if (typeof getError === "function") {
 
             var error = getError(currentBehaviour.state.error);
             currentBehaviour.state.error = error || undefined;
@@ -98,7 +98,7 @@ var endRunningBehaviour = function (currentBehaviour, options) {
         ])) businessBehaviourQueue.finish(...[
             currentBehaviour,
             () => self.runNextBehaviour()
-        ]); else debug('Behaviour already dequeued, may be misuse of next()');
+        ]); else debug("Behaviour already dequeued, may be misuse of next()");
     };
     if (ignoreBusinessOperation(...[
         currentBehaviour,
@@ -242,15 +242,15 @@ var BusinessBehaviourCycle = function (options) {
         ...modelOperations
     ].some(function (operation, _, operations) {
 
-        if (typeof operation !== 'string') return true;
+        if (typeof operation !== "string") return true;
         return operations.filter(function (op) {
 
             return operation === op;
         }).length > 1;
-    })) throw new Error('Operations should be an array of unique strings');
+    })) throw new Error("Operations should be an array of unique strings");
     var {
         businessBehaviourQueue,
-        BusinessBehaviourTypes
+        BusinessBehaviourType
     } = options;
     self.runNextBehaviour = function () {
 
@@ -264,15 +264,15 @@ var BusinessBehaviourCycle = function (options) {
             ]);
             switch (currentBehaviour.getType()) {
 
-                case BusinessBehaviourTypes.ONLINESYNC:
-                case BusinessBehaviourTypes.ONLINEACTION:
+                case BusinessBehaviourType.ONLINESYNC:
+                case BusinessBehaviourType.ONLINEACTION:
                     beginRunnigBehaviour.apply(self, [
                         currentBehaviour,
                         options
                     ]);
                     break;
-                case BusinessBehaviourTypes.OFFLINESYNC:
-                case BusinessBehaviourTypes.OFFLINEACTION:
+                case BusinessBehaviourType.OFFLINESYNC:
+                case BusinessBehaviourType.OFFLINEACTION:
                     continueRunningBehaviour.apply(self, [
                         currentBehaviour,
                         options
@@ -289,7 +289,7 @@ BusinessBehaviourCycle.setComplete = function () {
         currentBehaviour,
         completionDelegate
     ] = arguments;
-    var callingBack = typeof currentBehaviour.callback === 'function';
+    var callingBack = typeof currentBehaviour.callback === "function";
     if (callingBack) currentBehaviour.callback(...[
         currentBehaviour.state.businessObjects ||
         currentBehaviour.state.modelObjects ||
@@ -304,11 +304,11 @@ BusinessBehaviourCycle.setError = function (behaviour, err) {
 
     switch (err) {
 
-        case 'cancelled':
-            behaviour.state.error = new Error('Behaviour cancelled');
+        case "cancelled":
+            behaviour.state.error = new Error("Behaviour cancelled");
             break;
-        case 'failed':
-            behaviour.state.error = new Error('Mandatory behaviour failed');
+        case "failed":
+            behaviour.state.error = new Error("Mandatory behaviour failed");
             break;
     }
 };

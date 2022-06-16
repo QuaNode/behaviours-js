@@ -1,8 +1,8 @@
 /*jslint node: true */
-'use strict';
+"use strict";
 
-var { ServiceAdapter } = require('./ServiceAdapter.js');
-var { ServiceObjectMetadata } = require('./ServiceResponseMetadata.js');
+var { ServiceAdapter } = require("./ServiceAdapter.js");
+var { ServiceObjectMetadata } = require("./ServiceResponseMetadata.js");
 
 module.exports.ServiceEndPoint = function (options) {
 
@@ -12,27 +12,27 @@ module.exports.ServiceEndPoint = function (options) {
         Adapter,
         responseMetadata
     } = options;
-    if (typeof baseURI !== 'string') {
+    if (typeof baseURI !== "string") {
 
-        throw new Error('Invalid URI');
+        throw new Error("Invalid URI");
     }
-    var invalidAdapter = typeof Adapter !== 'function';
+    var invalidAdapter = typeof Adapter !== "function";
     if (!invalidAdapter) {
 
         invalidAdapter |= !(Adapter.prototype instanceof ServiceAdapter);
     }
     if (invalidAdapter) {
 
-        throw new Error('Invalid service provider');
+        throw new Error("Invalid service provider");
     }
-    var invalidMetadata = responseMetadata;
+    var invalidMetadata = !!responseMetadata;
     if (invalidMetadata) {
 
         invalidMetadata &= !(responseMetadata instanceof ServiceObjectMetadata);
     }
     if (invalidMetadata) {
 
-        throw new Error('Invalid response metadata');
+        throw new Error("Invalid response metadata");
     }
     self.responseMetadata = responseMetadata;
     self.adapter = (param) => new Adapter(baseURI, param);

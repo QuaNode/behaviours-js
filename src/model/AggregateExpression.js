@@ -1,13 +1,13 @@
 /*jslint node: true */
-'use strict';
+"use strict";
 
 var ComputationOperators = null;
 
 module.exports.setComputationOperators = function (co) {
 
-    if (typeof co !== 'object') {
+    if (typeof co !== "object") {
 
-        throw new Error('Invalid computation operators');
+        throw new Error("Invalid computation operators");
     }
     ComputationOperators = co;
     module.exports.ComputationOperators = ComputationOperators;
@@ -33,8 +33,8 @@ var AggregateExpression = function (options) {
     var self = this;
     if (!ComputationOperators) {
 
-        throw new Error('Set computation operators before' +
-            ' using aggregate expression');
+        throw new Error("Set computation operators before" +
+            " using aggregate expression");
     }
     var {
         fieldValue,
@@ -46,15 +46,15 @@ var AggregateExpression = function (options) {
     if (one) fieldValue = [fieldValue];
     fieldValue.forEach(function (computationOperator) {
 
-        var func = typeof computationOperator === 'function';
+        var func = typeof computationOperator === "function";
         if (func && !isValidOperator(...[
             ComputationOperators,
             computationOperator
         ])) {
 
-            throw new Error('The computation operator is not ' +
-                'one of the allowed computation operators,' +
-                ' please use ComputationOperators');
+            throw new Error("The computation operator is not " +
+                "one of the allowed computation operators," +
+                " please use ComputationOperators");
         }
     });
     self.fieldName = fieldName;

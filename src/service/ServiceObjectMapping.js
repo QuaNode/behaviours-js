@@ -1,8 +1,8 @@
 /*jslint node: true */
-'use strict';
+"use strict";
 
-var debug = require('debug')('backend:ServiceObjectMapping');
-var copy = require('shallow-copy');
+var debug = require("debug")("backend:ServiceObjectMapping");
+var copy = require("shallow-copy");
 
 var getParsedValue = function (value, type) {
 
@@ -11,14 +11,14 @@ var getParsedValue = function (value, type) {
         case Number:
             try {
 
-                if (typeof value === 'string') {
+                if (typeof value === "string") {
 
-                    var floating = value.indexOf('.') > -1;
+                    var floating = value.indexOf(".") > -1;
                     if (floating) value = parseFloat(value);
                     else value = parseInt(value);
                 }
                 var invalid = isNaN(value);
-                invalid |= typeof value !== 'number';
+                invalid |= typeof value !== "number";
                 if (invalid) value = null;
             } catch (e) {
 
@@ -27,12 +27,12 @@ var getParsedValue = function (value, type) {
             }
             break;
         case Boolean:
-            if (typeof value === 'string') {
+            if (typeof value === "string") {
 
                 value = value.toLowerCase();
             }
-            if (value === 'true') return true;
-            else if (value === 'false') return false;
+            if (value === "true") return true;
+            else if (value === "false") return false;
             else return null;
         case Date:
             try {
@@ -49,10 +49,10 @@ var getParsedValue = function (value, type) {
             if (Array.isArray(type)) {
 
                 var many = Array.isArray(value);
-                var scalar = typeof value === 'string';
+                var scalar = typeof value === "string";
                 if (many || scalar) {
 
-                    if (scalar) return value.split(',');
+                    if (scalar) return value.split(",");
                     return value.map(function (välue) {
 
                         if (type[0]) {
@@ -67,8 +67,8 @@ var getParsedValue = function (value, type) {
                 }
             } else {
 
-                var one = typeof type === 'object';
-                one &= typeof value === 'object';
+                var one = typeof type === "object";
+                one &= typeof value === "object";
                 if (one) for (var property in type) {
 
                     if (type.hasOwnProperty(property)) {
@@ -96,7 +96,7 @@ var getServiceValue = function () {
     ] = arguments;
     var serviceAttributeName = attributeMetadata.name;
     var modelAttributeName = attributeMetadata.model;
-    if (typeof attributeMetadata.getValue === 'function') {
+    if (typeof attributeMetadata.getValue === "function") {
 
         return getParsedValue(...[
             attributeMetadata.getValue(serviceObject),
@@ -108,11 +108,11 @@ var getServiceValue = function () {
     if (serviceAttributeName) {
 
         var many = Array.isArray(serviceObject);
-        var one = typeof serviceObject === 'object';
+        var one = typeof serviceObject === "object";
         if (many) for (var k = 0; k < serviceObject.length; k++) {
 
-            var extracting = key;
-            extracting &= value;
+            var extracting = !!key;
+            extracting &= !!value;
             if (extracting) {
 
                 var ofKey = serviceObject[k][key];
@@ -127,7 +127,7 @@ var getServiceValue = function () {
             }
         } else if (one) {
 
-            var components = serviceAttributeName.split('.');
+            var components = serviceAttributeName.split(".");
             serviceValue = serviceObject;
             for (var g = 0; g < components.length && serviceValue; g++) {
 
@@ -137,7 +137,7 @@ var getServiceValue = function () {
 
                     var attribMetadata = copy(attributeMetadata);
                     attribMetadata.name = serviceAttributeName.split(...[
-                        attributeName + '.'
+                        attributeName + "."
                     ])[1];
                     if (attribMetadata.name) return getServiceValue(...[
                         serviceValue,
@@ -199,7 +199,7 @@ module.exports.ServiceObjectMapping.prototype.mapServiceObject = function () {
         cb(mödelObject, mödelOperation);
     };
     var modelObject = {};
-    var modelOperation = 'insert';
+    var modelOperation = "insert";
     var idServiceValue = self.getIDServiceValue(...[
         serviceObject,
         objectMetadata,
@@ -212,7 +212,7 @@ module.exports.ServiceObjectMapping.prototype.mapServiceObject = function () {
         if (isIt) {
 
             modelObject = mödelObject;
-            modelOperation = 'update';
+            modelOperation = "update";
         }
         return isIt;
     })) mapAndSyncService_Model(...[
