@@ -26,8 +26,8 @@ var getFetchCallback = function () {
 
             behaviour: currentBehaviour.name,
             inputObjects: currentBehaviour.inputObjects,
-            resource: resource,
-            error: error
+            resource,
+            error
         }, OperationType.FETCH);
         callback();
     };
@@ -67,8 +67,8 @@ var getRequestCallback = function () {
 
             behaviour: currentBehaviour.name,
             inputObjects: currentBehaviour.inputObjects,
-            serviceObjects: serviceObjects,
-            error: error
+            serviceObjects,
+            error
         }, OperationType.REQUEST, serviceOperation);
         callback();
     };
@@ -100,8 +100,8 @@ var getManipulateCallback = function () {
 
             behaviour: currentBehaviour.name,
             inputObjects: currentBehaviour.inputObjects,
-            modelObjects: modelObjects,
-            error: error
+            modelObjects,
+            error
         }, OperationType.MANIPULATE, modelOperation);
         callback();
     };
@@ -141,7 +141,7 @@ var getMappingCallback = function () {
 
             behaviour: currentBehaviour.name,
             inputObjects: currentBehaviour.inputObjects,
-            businessObjects: businessObjects
+            businessObjects
         }, operation, BusinessOperation.MODELOBJECTMAPPING);
         callback(businessObjects);
     };

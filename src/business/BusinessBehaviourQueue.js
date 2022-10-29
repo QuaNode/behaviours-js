@@ -10,7 +10,7 @@ var getCancelFunc = function () {
         behaviourQueue,
         executingBehaviourQueue
     ] = arguments;
-    return function (ignoreSetComplete) {
+    return function (ignoreSetComplete, cancellingReason) {
 
         behaviourQueue.forEach(function (queueBehaviour) {
 
@@ -25,6 +25,13 @@ var getCancelFunc = function () {
         });
         if (executingBehaviourQueue.indexOf(behaviour) > -1) {
 
+            behaviour.state.serviceOperations = [];
+            behaviour.state.modelOperations = [];
+            behaviour.state.businessOperations = [];
+            if (cancellingReason) {
+
+                behaviour.state.error = new Error(cancellingReason);
+            }
             var cancelling = typeof cancelExecutingBehaviour === "function";
             if (cancelling) cancelExecutingBehaviour(...[
                 behaviour
@@ -32,7 +39,7 @@ var getCancelFunc = function () {
         } else if (behaviourQueue.indexOf(behaviour) > -1) self.dequeue(...[
             behaviour,
             ignoreSetComplete,
-            "cancelled"
+            cancellingReason || "cancelled"
         ]);
     };
 };
@@ -143,15 +150,32 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
                 break;
             }
         }
-        if (behaviourQueue.indexOf(...[
-            behaviour
-        ]) === behaviourQueue.length - 1) next();
-        return getCancelFunc.apply(self, [
+        var cancelFunc = getCancelFunc.apply(self, [
             behaviour,
             cancelExecutingBehaviour,
             behaviourQueue,
             executingBehaviourQueue
         ]);
+        var index = behaviourQueue.indexOf(...[
+            behaviour
+        ]);
+        if (behaviour.timeout > 0) {
+
+            behaviour._timeout = setTimeout(...[
+                function () {
+
+                    behaviour._timeout = undefined;
+                    delete behaviour._timeout;
+                    var length = behaviourQueue.length;
+                    var reason = "Behaviour timeout at index " + index;
+                    reason += " while " + length + " in the queue";
+                    cancelFunc(false, reason);
+                },
+                behaviour.timeout * 1000
+            ]);
+        }
+        if (index === behaviourQueue.length - 1) next();
+        return cancelFunc;
     };
     self.dequeue = function () {
 
@@ -160,6 +184,12 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
             ignoreSetComplete,
             error
         ] = arguments;
+        if (currentBehaviour._timeout) {
+
+            clearTimeout(currentBehaviour._timeout);
+            currentBehaviour._timeout = undefined;
+            delete currentBehaviour._timeout;
+        }
         var index = behaviourQueue.indexOf(currentBehaviour);
         if (index > -1) {
 

@@ -309,7 +309,7 @@ var createRequest = function () {
     }
     var request = {
 
-        type: type,
+        type,
         path: serviceEndPoint.path,
         context: serviceEndPoint.context
     };

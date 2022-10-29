@@ -36,8 +36,9 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
             languageParameters
         ]);
         var type = null;
-        self.priority = options.priority;
         self.name = options.name;
+        self.priority = options.priority;
+        self.timeout = options.timeout;
         self.inputObjects = options.inputObjects;
         self.state = {};
         self.searchText = options.searchText;

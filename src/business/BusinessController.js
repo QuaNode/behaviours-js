@@ -42,22 +42,22 @@ var BusinessController = function (options) {
     }
     var modelOperationDelegate = new ModelOperationDelegate({
 
-        modelController: modelController,
-        getModelMethods: getModelMethods,
-        modelOperations: modelOperations
+        modelController,
+        getModelMethods,
+        modelOperations
     });
     var serviceOperationDelegate = new ServiceOperationDelegate({
 
-        modelController: modelController,
+        modelController,
         ModelEntity: options.ModelEntity,
         QueryExpression: options.QueryExpression,
         ComparisonOperators: options.ComparisonOperators,
-        serviceController: serviceController,
-        getServiceMethods: getServiceMethods,
-        serviceOperations: serviceOperations,
-        resourceController: resourceController,
-        fetchMethod: fetchMethod,
-        FetchBehaviour: FetchBehaviour
+        serviceController,
+        getServiceMethods,
+        serviceOperations,
+        resourceController,
+        fetchMethod,
+        FetchBehaviour
     });
     var businessOperationDelegate = new BusinessOperationDelegate();
     var businessBehaviourQueue = new BusinessBehaviourQueue(...[
@@ -66,11 +66,11 @@ var BusinessController = function (options) {
     ]);
     var businessDelegator = new BusinessDelegator({
 
-        modelOperationDelegate: modelOperationDelegate,
-        serviceOperationDelegate: serviceOperationDelegate,
-        businessOperationDelegate: businessOperationDelegate,
-        FetchBehaviour: FetchBehaviour,
-        operationCallback: operationCallback
+        modelOperationDelegate,
+        serviceOperationDelegate,
+        businessOperationDelegate,
+        FetchBehaviour,
+        operationCallback
     });
     var {
         delegateServiceOperation,
@@ -81,14 +81,14 @@ var BusinessController = function (options) {
     var businessBehaviourCycle = new BusinessBehaviourCycle({
 
         businessController: self,
-        serviceOperations: serviceOperations,
-        modelOperations: modelOperations,
-        BusinessBehaviourType: BusinessBehaviourType,
-        businessBehaviourQueue: businessBehaviourQueue,
-        delegateServiceOperation: delegateServiceOperation,
-        delegateModelOperation: delegateModelOperation,
-        delegateServiceMappingOperation: delegateServiceMappingOperation,
-        delegateModelMappingOperation: delegateModelMappingOperation
+        serviceOperations,
+        modelOperations,
+        BusinessBehaviourType,
+        businessBehaviourQueue,
+        delegateServiceOperation,
+        delegateModelOperation,
+        delegateServiceMappingOperation,
+        delegateModelMappingOperation
     });
     self.modelController = modelController;
     self.serviceController = serviceController;

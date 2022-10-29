@@ -255,7 +255,7 @@ var BusinessBehaviourCore = function (options) {
     var beginConditions = options.beginConditions;
     var operationDelegateExecutive = new OperationDelegateExecutive({
 
-        watchers: watchers
+        watchers
     });
     self.beginServiceOperation = function () {
 
