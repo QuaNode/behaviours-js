@@ -87,7 +87,7 @@ var getServiceOperation = function () {
             service: null,
             callback: null,
         },
-        apply: function (parameters, service, callback, append) {
+        apply(parameters, service, callback, append) {
 
             var {
                 executeServiceOperation
@@ -130,7 +130,7 @@ var getModelOperation = function () {
             entity: null,
             callback: null
         },
-        apply: function (queryOrObjects, entity, callback, append) {
+        apply(queryOrObjects, entity, callback, append) {
 
             var {
                 executeModelOperation
@@ -168,7 +168,7 @@ var getServiceMappingOperation = function () {
 
             callback: null
         },
-        apply: function (callback) {
+        apply(callback) {
 
             var {
                 executeServiceMappingOperation
@@ -198,7 +198,7 @@ var getModelMappingOperation = function () {
             identifiers: null,
             callback: null
         },
-        apply: function (identifiers, callback) {
+        apply(identifiers, callback) {
 
             var {
                 executeModelMappingOperation
@@ -229,7 +229,7 @@ var getErrorHandlingOperation = function () {
 
             error: null
         },
-        apply: function (error) {
+        apply(error) {
 
             var {
                 executeErrorHandlingOperation

@@ -37,7 +37,18 @@ var getFetchCancelCallback = function (currentBehaviour) {
 
     return function (cancel) {
 
-        if (cancel) currentBehaviour.cancel = cancel;
+        if (cancel) {
+
+            var _cancel = currentBehaviour.cancel;
+            currentBehaviour.cancel = function () {
+
+                cancel();
+                if (typeof _cancel === 'function') {
+
+                    _cancel();
+                }
+            };
+        }
     };
 };
 

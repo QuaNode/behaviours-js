@@ -53,7 +53,7 @@ var getCompletionObject = function (completionDelegate) {
             success: null,
             dependentBehaviours: null
         },
-        apply: function (success, dependentBehaviours) {
+        apply(success, dependentBehaviours) {
 
             if (typeof success === "boolean") this.data.success = success;
             if (dependentBehaviours) {
@@ -79,12 +79,12 @@ var getCompletionObject = function (completionDelegate) {
                 return this.data.dependentBehaviours;
             });
         },
-        success: function () {
+        success() {
 
             this.data.success = arguments[0];
             return this;
         },
-        dependencies: function () {
+        dependencies() {
 
             this.data.dependentBehaviours = arguments[0];
             return this;

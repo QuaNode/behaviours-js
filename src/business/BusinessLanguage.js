@@ -7,7 +7,7 @@ var getIfReturn = function () {
     var [beginConditions, condition] = arguments;
     return {
 
-        begin: function () {
+        begin() {
 
             var operations = arguments[0];
             if (typeof operations === "string") {
@@ -38,7 +38,7 @@ var getUseReturn = function () {
     ] = arguments;
     return {
 
-        begin: function () {
+        begin() {
 
             for (var j = 0; j < arguments.length; j++) {
 
@@ -50,7 +50,7 @@ var getUseReturn = function () {
             begin = arguments;
             return this;
         },
-        when: function () {
+        when() {
 
             var [operations, condition, options] = arguments;
             var withoutCondition = typeof condition === "object";

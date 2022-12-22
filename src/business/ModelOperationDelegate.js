@@ -34,9 +34,9 @@ var getManipulateDelegate = function () {
             var callingBack = typeof setModelObjects === "function";
             if (callingBack) {
 
-                callingBack &= setModelObjects(modelObjects, error);
+                callingBack &= !!setModelObjects(modelObjects, error);
             }
-            if (callingBack) callingBack &= modelObjects;
+            if (callingBack) callingBack &= !!modelObjects;
             if (callingBack) callback(modelObjects, error);
             else callback(null, error);
         };

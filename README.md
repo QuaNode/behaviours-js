@@ -109,7 +109,7 @@ var businessController = new BusinessController({
     ModelEntity: ModelEntity,
     QueryExpression: QueryExpression,
     ComparisonOperators: ComparisonOperators,
-    operationCallback: function (data, operationType, operationSubtype) {
+    operationCallback(data, operationType, operationSubtype) {
       // logic to be executed on all behaviours per operation
     }
 });
