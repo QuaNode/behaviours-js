@@ -1,5 +1,7 @@
 # behaviours-js [![Codacy Badge](https://app.codacy.com/project/badge/Grade/b4680544631e4c5fa1aed0e54f607b99)](https://www.codacy.com/gh/QuaNode/behaviours-js/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=QuaNode/behaviours-js&amp;utm_campaign=Badge_Grade)
 
+![0_00](https://user-images.githubusercontent.com/3101473/227830594-d493d29c-c96d-4213-b5fa-b595493d2953.png)
+
 Behaviours framework written in JavaScript implementing [Behaviour-first design](https://github.com/QuaNode/backend-js/wiki/Behavior-first-design) and queue-map architecture as part of [BeamJS](https://github.com/QuaNode/beamjs).
 
 ## Installation
