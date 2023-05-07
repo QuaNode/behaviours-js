@@ -39,7 +39,7 @@ var getFetchCancelCallback = function (currentBehaviour) {
 
         if (cancel) {
 
-            var _cancel = currentBehaviour.cancel;
+            let _cancel = currentBehaviour.cancel;
             currentBehaviour.cancel = function () {
 
                 cancel();
