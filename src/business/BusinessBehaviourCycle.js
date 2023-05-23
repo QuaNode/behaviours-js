@@ -12,8 +12,8 @@ var BusinessOperation = {
 
 var ServiceOperation = {
 
-    AUTHENTICATION: "Authentication",
     FETCH: "Fetch",
+    AUTHENTICATION: "Authentication",
     REQUEST: "Request"
 };
 
@@ -38,8 +38,8 @@ var validateServiceOperations = function (serviceOperations) {
 
     return Array.isArray(serviceOperations) ? serviceOperations : [
         ServiceOperation.REQUEST,
-        ServiceOperation.FETCH,
-        ServiceOperation.AUTHENTICATION
+        ServiceOperation.AUTHENTICATION,
+        ServiceOperation.FETCH
     ];
 };
 

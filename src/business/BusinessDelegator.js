@@ -256,9 +256,9 @@ var BusinessDelegator = function (options) {
         switch (operation) {
 
             case OperationType.MAPTO: {
-                var fromObjects = state.modelObjects;
+                let fromObjects = state.modelObjects;
                 if (!fromObjects) fromObjects = state.serviceObjects;
-                var mappingCallback = getMappingCallback(...[
+                let mappingCallback = getMappingCallback(...[
                     currentBehaviour,
                     operation,
                     operationCallback,
@@ -271,9 +271,9 @@ var BusinessDelegator = function (options) {
                 ]);
             }
             case OperationType.MAPBETWEEN: {
-                var fromObjects = state.modelObjects;
+                let fromObjects = state.modelObjects;
                 if (!fromObjects) fromObjects = state.serviceObjects;
-                var mappingCallback = getMappingCallback(...[
+                let mappingCallback = getMappingCallback(...[
                     currentBehaviour,
                     operation,
                     operationCallback,

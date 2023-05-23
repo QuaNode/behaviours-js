@@ -253,8 +253,7 @@ var reflectOnModel = function () {
         options
     ] = arguments;
     var serviceObjects = null;
-    if (Array.isArray(response)) serviceObjects = response;
-    else {
+    if (Array.isArray(response)) serviceObjects = response; else {
 
         var extracting = typeof response === "object";
         extracting &= !!objectMetadata;
@@ -265,8 +264,7 @@ var reflectOnModel = function () {
         if (extracting) {
 
             var path = objectMetadata.name;
-            if (path.length === 0) serviceObjects = [response];
-            else {
+            if (path.length === 0) serviceObjects = [response]; else {
 
                 var components = path.split(".");
                 var res = response;
@@ -301,8 +299,7 @@ var createRequest = function () {
 
         var [servicePrameter] = arguments;
         return !(servicePrameter instanceof ServiceParameter);
-    }))
-        throw new Error("Invalid service paramaters");
+    })) throw new Error("Invalid service paramaters");
     if (!(serviceEndPoint instanceof ServiceEndPoint)) {
 
         throw new Error("Invalid service endpoint");

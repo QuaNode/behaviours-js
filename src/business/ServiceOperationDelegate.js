@@ -2,7 +2,7 @@
 /*jshint esversion: 6 */
 "use strict";
 
-var { OperationType } = require("./BusinessBehaviourCycle.js");
+var { ServiceOperation } = require("./BusinessBehaviourCycle.js");
 var { ServiceController } = require("../service/ServiceController.js");
 
 var getRequestDelegate = function () {
@@ -21,8 +21,7 @@ var getRequestDelegate = function () {
             getEndPoint,
             setServiceObjects
         ] = arguments;
-        var SERVICEOPERATION = serviceOperation.toUpperCase();
-        if (SERVICEOPERATION == OperationType.FETCH.toUpperCase()) {
+        if (serviceOperation === ServiceOperation.FETCH) {
 
             throw new Error("Missing or invalid fetch behaviour");
         }
@@ -30,9 +29,12 @@ var getRequestDelegate = function () {
 
             throw new Error("No service controller for online behaviour");
         }
-        for (var i = 0; i < serviceOperations.length; i++) {
+        for (var i = 0; i < serviceOperations.filter(function (operation) {
 
-            var method = serviceMethods[serviceOperations[i]];
+            return operation !== ServiceOperation.FETCH;
+        }).length; i++) {
+
+            let method = serviceMethods[serviceOperations[i]];
             if (typeof self.serviceController[method] !== "function") {
 
                 throw new Error("Invalid service method");
@@ -55,7 +57,7 @@ var getRequestDelegate = function () {
         if (typeof getEndPoint === "function") {
 
             var ep = getEndPoint();
-            var method = serviceMethods[serviceOperation];
+            let method = serviceMethods[serviceOperation];
             self.serviceController[method](sp, ep, requestHandler);
         } else requestHandler();
     };

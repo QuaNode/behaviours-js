@@ -35,7 +35,7 @@ module.exports.ServiceEndPoint = function (options) {
         throw new Error("Invalid response metadata");
     }
     self.responseMetadata = responseMetadata;
-    self.adapter = (param) => new Adapter(baseURI, param);
+    self.adapter = (constants) => new Adapter(baseURI, constants);
     self.consumableByAdapter = function (serviceAdapter) {
 
         if (serviceAdapter instanceof Adapter) {

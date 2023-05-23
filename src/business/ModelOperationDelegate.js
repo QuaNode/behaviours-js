@@ -23,7 +23,7 @@ var getManipulateDelegate = function () {
         }
         for (var i = 0; i < modelOperations.length; i++) {
 
-            var method = modelMethods[modelOperations[i]];
+            let method = modelMethods[modelOperations[i]];
             if (typeof self.modelController[method] !== "function") {
 
                 throw new Error("Invalid model method");
@@ -46,7 +46,7 @@ var getManipulateDelegate = function () {
         if (typeof getModelEntity === "function") {
 
             var md = getModelEntity();
-            var method = modelMethods[modelOperation];
+            let method = modelMethods[modelOperation];
             self.modelController[method](wp, md, modelCallback);
         } else modelCallback();
     };
