@@ -99,8 +99,7 @@ var getFetchDelegate = function () {
             else callback(null, error);
         };
         var stream = typeof getStream === "function";
-        if (stream) stream = getStream();
-        else stream = undefined;
+        if (stream) stream = getStream(); else stream = undefined;
         if (typeof getResourceInfo === "function") {
 
             resource = getResourceInfo();
