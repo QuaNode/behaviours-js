@@ -37,12 +37,13 @@ var getManipulateDelegate = function () {
                 callingBack &= !!setModelObjects(modelObjects, error);
             }
             if (callingBack) callingBack &= !!modelObjects;
-            if (callingBack) callback(modelObjects, error);
-            else callback(null, error);
+            if (callingBack) callback(modelObjects, error); else {
+
+                callback(null, error);
+            }
         };
         var wp = typeof getObjWrapperOrObjAttributes === "function";
-        if (wp) wp = getObjWrapperOrObjAttributes();
-        else wp = [];
+        if (wp) wp = getObjWrapperOrObjAttributes(); else wp = [];
         if (typeof getModelEntity === "function") {
 
             var md = getModelEntity();

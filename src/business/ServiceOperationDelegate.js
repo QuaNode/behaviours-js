@@ -48,12 +48,13 @@ var getRequestDelegate = function () {
                 callingBack &= !!setServiceObjects(serviceObjects, error);
             }
             if (callingBack) callingBack &= !!serviceObjects
-            if (callingBack) callback(serviceObjects, error);
-            else callback(null, error);
+            if (callingBack) callback(serviceObjects, error); else {
+
+                callback(null, error);
+            }
         };
         var sp = typeof getServiceParameters === "function";
-        if (sp) sp = getServiceParameters();
-        else sp = [];
+        if (sp) sp = getServiceParameters(); else sp = [];
         if (typeof getEndPoint === "function") {
 
             var ep = getEndPoint();

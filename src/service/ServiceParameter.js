@@ -16,11 +16,14 @@ var ServiceParameterKey = {
 
 var ServiceParameterType = {
 
+    DATA: "data",
+    OPTION: "option",
     BODY: "body",
     HEADER: "header",
     METHOD: "method",
     URIQUERY: "uriquery",
-    URIPARAMETER: "uriparameter"
+    URIPARAMETER: "uriparameter",
+    OTHER: "other"
 };
 
 module.exports.ServiceParameter = function (options) {
@@ -42,19 +45,14 @@ module.exports.ServiceParameter = function (options) {
 
             switch (typeParameter) {
 
+                case ServiceParameterType.DATA:
+                case ServiceParameterType.OPTION:
                 case ServiceParameterType.BODY:
-                    type = typeParameter;
-                    break;
                 case ServiceParameterType.HEADER:
-                    type = typeParameter;
-                    break;
                 case ServiceParameterType.METHOD:
-                    type = typeParameter;
-                    break;
                 case ServiceParameterType.URIQUERY:
-                    type = typeParameter;
-                    break;
                 case ServiceParameterType.URIPARAMETER:
+                case ServiceParameterType.OTHER:
                     type = typeParameter;
                     break;
                 default:
@@ -62,7 +60,10 @@ module.exports.ServiceParameter = function (options) {
             }
         }
     };
-    self.setType(type);
+    if (type) self.setType(type); else {
+
+        type = ServiceParameterType.DATA;
+    }
 };
 
 module.exports.ServiceParameterKey = ServiceParameterKey;

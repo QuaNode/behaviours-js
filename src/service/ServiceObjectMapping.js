@@ -14,8 +14,10 @@ var getParsedValue = function (value, type) {
                 if (typeof value === "string") {
 
                     var floating = value.indexOf(".") > -1;
-                    if (floating) value = parseFloat(value);
-                    else value = parseInt(value);
+                    if (floating) value = parseFloat(value); else {
+
+                        value = parseInt(value);
+                    }
                 }
                 var invalid = isNaN(value);
                 invalid |= typeof value !== "number";
@@ -31,9 +33,13 @@ var getParsedValue = function (value, type) {
 
                 value = value.toLowerCase();
             }
-            if (value === "true") return true;
-            else if (value === "false") return false;
-            else return null;
+            if (value === "true") return true; else {
+
+                if (value === "false") {
+
+                    return false;
+                } else return null;
+            }
         case Date:
             try {
 

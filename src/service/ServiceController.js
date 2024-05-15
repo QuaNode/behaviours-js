@@ -12,7 +12,6 @@ var encodeServiceParameters = function () {
         serviceParameters,
         request
     ] = arguments;
-    request.method = "GET";
     for (var i = 0, q = 0; i < serviceParameters.length; i++) {
 
         var type = serviceParameters[i].type();
@@ -20,6 +19,14 @@ var encodeServiceParameters = function () {
         var value = serviceParameters[i].value();
         switch (type) {
 
+            case ServiceParameterType.DATA:
+                if (!request.data) request.data = {};
+                request.data[key] = value;
+                break;
+            case ServiceParameterType.OPTION:
+                if (!request.options) request.options = {};
+                request.options[key] = value;
+                break;
             case ServiceParameterType.BODY:
                 if (!request.body) request.body = {};
                 request.body[key] = value;
@@ -32,8 +39,7 @@ var encodeServiceParameters = function () {
                 request.method = value;
                 break;
             case ServiceParameterType.URIQUERY:
-                if (q++ > 0) request.path += "&";
-                else request.path += "?";
+                if (q++ > 0) request.path += "&"; else request.path += "?";
                 request.path += key;
                 request.path += "=";
                 request.path += encodeURIComponent(value);
@@ -44,9 +50,17 @@ var encodeServiceParameters = function () {
                     encodeURIComponent(value)
                 ]);
                 break;
+            case ServiceParameterType.OTHER:
+                if (!request.other) request.other = {};
+                request.other[key] = value;
+                break;
             default:
                 throw new Error("Invalid service paramater");
         }
+    }
+    if (!request.data && !request.method) {
+
+        request.method = "GET";
     }
 };
 

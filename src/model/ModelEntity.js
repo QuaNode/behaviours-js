@@ -72,8 +72,10 @@ module.exports.ModelEntity.registerModelEntity = function (options) {
         throw new Error("Entity with same name already" +
             " registered: " + entityName);
     }
-    if (validEntity && validName) ModelEntities[entityName] = entity;
-    else throw new Error("Invalid entity parameters");
+    if (validEntity && validName) {
+
+        ModelEntities[entityName] = entity;
+    } else throw new Error("Invalid entity parameters");
 };
 
 module.exports.ModelEntity.createModelEntity = function () {

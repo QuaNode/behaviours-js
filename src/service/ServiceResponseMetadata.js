@@ -62,8 +62,10 @@ module.exports.ServiceAttributeMetadata = ServiceAttributeMetadata = function (o
     if (typeof name === "string") self.name = name;
     if (getValue) {
 
-        if (typeof getValue === "function") self.getValue = getValue;
-        else throw new Error("Invalid service attribute value function");
+        if (typeof getValue === "function") self.getValue = getValue; else {
+
+            throw new Error("Invalid service attribute value function");
+        }
     }
     if (metadata) {
 

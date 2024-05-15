@@ -155,18 +155,20 @@ var BusinessLanguage = function (options) {
 
                 manyOperations = operations.length <= arguments.length - 1;
             }
-            if (oneOperation) delegates[operations] = arguments[1];
-            else if (manyOperations) {
+            if (oneOperation) delegates[operations] = arguments[1]; else {
 
-                for (var i = 1; i < arguments.length; i++) {
+                if (manyOperations) {
 
-                    if (typeof arguments[i] !== "function") {
+                    for (var i = 1; i < arguments.length; i++) {
 
-                        throw new Error("Invalid delegate function");
+                        if (typeof arguments[i] !== "function") {
+
+                            throw new Error("Invalid delegate function");
+                        }
+                        delegates[operations[i - 1]] = arguments[i];
                     }
-                    delegates[operations[i - 1]] = arguments[i];
-                }
-            } else throw new Error("Invalid begin parameters");
+                } else throw new Error("Invalid begin parameters");
+            }
         } else throw new Error("Invalid begin parameters");
         return self;
     };

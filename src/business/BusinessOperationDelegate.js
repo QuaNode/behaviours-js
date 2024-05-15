@@ -26,15 +26,19 @@ var getInputObjectsReturn = function () {
                 ])(function (inputObject) {
 
                     inputObjects.push(inputObject);
-                    if (objects[index + 1]) push(index + 1, inputObjects);
-                    else if (typeof cb === "function") cb(inputObjects);
+                    if (objects[index + 1]) {
+
+                        push(index + 1, inputObjects);
+                    } else if (typeof cb === "function") cb(inputObjects);
                 });
             }, 0);
         };
         if (Array.isArray(objects)) {
 
-            if (objects[0]) push(0, []);
-            else if (typeof cb === "function") cb([]);
+            if (objects[0]) push(0, []); else {
+
+                if (typeof cb === "function") cb([]);
+            }
         } else if (objects) getInputObject(...[
             objects,
             superProperty,
@@ -81,8 +85,7 @@ var getInputObjectReturn = function () {
         ])(function () {
 
             if (typeof cb === "function") cb(inputObject);
-        });
-        else if (typeof cb === "function") cb(inputObject);
+        }); else if (typeof cb === "function") cb(inputObject);
     };
 };
 
@@ -108,13 +111,14 @@ var getBusinessObjectsReturn = function () {
                 ])(function (businessObject) {
 
                     businessObjects.push(businessObject);
-                    if (objects[index + 1]) push(index + 1, businessObjects);
-                    else if (typeof cb === "function") cb(businessObjects);
+                    if (objects[index + 1]) push(index + 1, businessObjects); else {
+
+                        if (typeof cb === "function") cb(businessObjects);
+                    }
                 });
             }, 0);
         };
-        if (objects[0]) push(0, []);
-        else if (typeof cb === "function") cb([]);
+        if (objects[0]) push(0, []); else if (typeof cb === "function") cb([]);
     };
 };
 

@@ -10,8 +10,10 @@ var ifCondition = function (operation, conditions) {
 
     var lazy = typeof conditions[operation] === "function";
     var scalar = typeof conditions[operation] === "boolean";
-    if (lazy && !conditions[operation]()) return false;
-    else if (scalar && !conditions[operation]) return false;
+    if (lazy && !conditions[operation]()) return false; else {
+
+        if (scalar && !conditions[operation]) return false;
+    }
     return true;
 };
 

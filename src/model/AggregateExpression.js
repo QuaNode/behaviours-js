@@ -60,8 +60,10 @@ var AggregateExpression = function (options) {
     self.fieldName = fieldName;
     self.fieldValue = fieldValue;
     var many = Array.isArray(contextualLevels);
-    if (many) self.contextualLevels = contextualLevels;
-    else contextualLevels = [];
+    if (many) self.contextualLevels = contextualLevels; else {
+
+        contextualLevels = [];
+    }
     self.computationOrder = computationOrder || 0;
 };
 

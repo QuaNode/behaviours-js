@@ -123,13 +123,15 @@ BusinessBehaviour.prototype.hasMandatoryBehaviour = function () {
     var self = this;
     var [behaviour] = arguments;
     var mandatory = self.mandatoryBehaviour === behaviour;
-    if (behaviour && mandatory) return true;
-    else if (self.mandatoryBehaviour instanceof BusinessBehaviour) {
+    if (behaviour && mandatory) return true; else {
 
-        return self.mandatoryBehaviour.hasMandatoryBehaviour(...[
-            behaviour
-        ]);
-    } else return false;
+        if (self.mandatoryBehaviour instanceof BusinessBehaviour) {
+
+            return self.mandatoryBehaviour.hasMandatoryBehaviour(...[
+                behaviour
+            ]);
+        } else return false;
+    }
 };
 
 BusinessBehaviour.prototype.isEqualToBehaviour = (behaviour) => this === behaviour;

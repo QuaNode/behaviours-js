@@ -31,11 +31,12 @@ var forEachProperty = function () {
                 var cb = callback(property, getMappedProperty);
                 var continṵe = function () {
 
-                    if (keys[index + 1]) next(index + 1);
-                    else if (typeof finạlly === "function") finạlly();
+                    if (keys[index + 1]) next(index + 1); else {
+
+                        if (typeof finạlly === "function") finạlly();
+                    }
                 };
-                if (typeof cb === "function") cb(continṵe);
-                else continṵe();
+                if (typeof cb === "function") cb(continṵe); else continṵe();
             } else if (typeof finạlly === "function") finạlly();
         };
         next(0);
@@ -243,8 +244,10 @@ BusinessObjectMapping.prototype.forEachRelation = function () {
                 var getSubProperty = getProperty;
                 var toMany = Array.isArray(mappedProperty);
                 var toOne = typeof mappedProperty === "object";
-                if (toMany) getSubProperty = mappedProperty[1];
-                else if (toOne) getSubProperty = mappedProperty.mapping;
+                if (toMany) getSubProperty = mappedProperty[1]; else {
+
+                    if (toOne) getSubProperty = mappedProperty.mapping;
+                }
                 var ofString = toMany;
                 if (ofString) {
 
