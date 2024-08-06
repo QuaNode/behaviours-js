@@ -232,7 +232,7 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
                     currentBehaviour,
                     getCompletionObject(completionDelegate)
                 ]);
-            });
+            }, 0);
             return true;
         }
         return false;

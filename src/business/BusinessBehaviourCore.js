@@ -70,7 +70,11 @@ var getOperationFunc = function (attribute) {
 
 var getOperationCancelFunc = function (delegate) {
 
-    return () => delegate();
+    return function () {
+
+        this.apply = () => { };
+        return delegate();
+    };
 };
 
 var getServiceOperation = function () {
@@ -87,7 +91,7 @@ var getServiceOperation = function () {
             append: null,
             parameters: null,
             service: null,
-            callback: null,
+            callback: null
         },
         apply(parameters, service, callback, append) {
 
