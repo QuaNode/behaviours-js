@@ -41,7 +41,6 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
         self.timeout = options.timeout;
         self.inputObjects = options.inputObjects;
         self.state = {};
-        self.searchText = options.searchText;
         self.mandatoryBehaviour = options.mandatoryBehaviour;
         self.getType = () => type;
         self.setType = function (typeParameter) {

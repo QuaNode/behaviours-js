@@ -16,6 +16,7 @@ var BusinessController = function (options) {
     var self = this;
     var ignoreBehaviours = false;
     var {
+        identifier,
         modelController,
         getModelMethods,
         serviceController,
@@ -112,6 +113,7 @@ var BusinessController = function (options) {
         if (ignoring) return () => { };
         behaviour.getProperty = getProperty || ((property) => property);
         behaviour.callback = callback;
+        behaviour.controller = identifier;
         return businessBehaviourQueue.enqueue(...[
             behaviour,
             () => businessBehaviourCycle.runNextBehaviour(),
