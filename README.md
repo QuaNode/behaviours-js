@@ -2,7 +2,7 @@
 
 ![0_00](https://user-images.githubusercontent.com/3101473/227830594-d493d29c-c96d-4213-b5fa-b595493d2953.png)
 
-Modern enterprise and customer behaviours framework written in JavaScript implementing [Behaviour-first design](https://github.com/QuaNode/backend-js/wiki/Behavior-first-design) and queue-map architecture as part of [BeamJS](https://github.com/QuaNode/beamjs) for private IoB and behavioral programming.
+Modern enterprise and customer behaviours framework written in JavaScript implementing [Behaviour-first design](https://github.com/QuaNode/backend-js/wiki/Behavior-first-design) and queue-map architecture as part of [BeamJS](https://github.com/QuaNode/beamjs).
 
 ## Installation
 
