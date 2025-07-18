@@ -135,7 +135,7 @@ var getObjectsByIDFunc = function (modelController, options) {
             gettingObjects &= typeof modelController.getObjects === "function";
         }
         if (gettingObjects) modelController.getObjects(...[
-            queryByID,
+            { getObjectQuery: () => queryByID },
             modelEntity,
             function (result, error) {
 

@@ -42,6 +42,13 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
         self.inputObjects = options.inputObjects;
         self.state = {};
         self.mandatoryBehaviour = options.mandatoryBehaviour;
+        self.setOption = function (key, value) {
+
+            if (!options[key]) {
+
+                options[key] = value;
+            }
+        };
         self.getType = () => type;
         self.setType = function (typeParameter) {
 
@@ -56,7 +63,7 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
                         var typë = BusinessBehaviourType[behaviourType];
                         if (typë === typeParameter) {
 
-                            type = typeParameter;
+                            type = options.type = typeParameter;
                             return;
                         }
                     }
