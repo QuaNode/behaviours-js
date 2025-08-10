@@ -56,6 +56,49 @@ var getRelateReturn = function () {
         getProperty,
         superProperties
     ] = arguments;
+    var setRelation = function (property, mappedProperty, getSubProperty) {
+
+        if (superProperties.indexOf(superProperty) === -1) {
+
+            return function () {
+
+                var cb = arguments[0];
+                if (superProperty) {
+
+                    superProperties.push(superProperty);
+                }
+                var relate = function (businessObject) {
+
+                    if (mappedProperty) {
+
+                        if (typeof mappedProperty === "function") {
+
+                            mappedProperty(leftObject, businessObject);
+                        } else if (typeof mappedProperty === "string") {
+
+                            leftObject[mappedProperty] = businessObject;
+                        } else throw new Error("Invalid property name");
+                    } else if (mappedProperty === null) self.map(...[
+                        leftObject,
+                        businessObject,
+                        true,
+                        superProperty,
+                        getProperty
+                    ]);
+                    cb();
+                };
+                var gettingObject_s = !!rightObject[property];
+                gettingObject_s &= typeof getObjects === "function";
+                gettingObject_s &= typeof getObject === "function";
+                var toMany = Array.isArray(rightObject[property]);
+                if (gettingObject_s) (toMany ? getObjects : getObject)(...[
+                    rightObject[property],
+                    property,
+                    getSubProperty
+                ])((businessObject) => relate(businessObject)); else relate(null);
+            };
+        }
+    };
     return function () {
 
         var callback = arguments[0];
@@ -63,49 +106,7 @@ var getRelateReturn = function () {
             rightObject,
             superProperty,
             getProperty,
-            function (property, mappedProperty, getSubProperty) {
-
-                if (superProperties.indexOf(superProperty) === -1) {
-
-                    return function () {
-
-                        var cb = arguments[0];
-                        if (superProperty) {
-
-                            superProperties.push(superProperty);
-                        }
-                        var relate = function (businessObject) {
-
-                            if (mappedProperty) {
-
-                                if (typeof mappedProperty === "function") {
-
-                                    mappedProperty(leftObject, businessObject);
-                                } else if (typeof mappedProperty === "string") {
-
-                                    leftObject[mappedProperty] = businessObject;
-                                } else throw new Error("Invalid property name");
-                            } else if (mappedProperty === null) self.map(...[
-                                leftObject,
-                                businessObject,
-                                true,
-                                superProperty,
-                                getProperty
-                            ]);
-                            cb();
-                        };
-                        var gettingObject_s = !!rightObject[property];
-                        gettingObject_s &= typeof getObjects === "function";
-                        gettingObject_s &= typeof getObject === "function";
-                        var toMany = Array.isArray(rightObject[property]);
-                        if (gettingObject_s) (toMany ? getObjects : getObject)(...[
-                            rightObject[property],
-                            property,
-                            getSubProperty
-                        ])((businessObject) => relate(businessObject)); else relate(null);
-                    };
-                }
-            },
+            setRelation,
             callback
         ]); else callback();
     };
@@ -186,22 +187,23 @@ BusinessObjectMapping.prototype.forEachAttribute = function () {
         scalar &= typeof value !== "function";
         return !!scalar;
     };
+    let setMapping = function (property, getMappedProperty) {
+
+        var mappedProperty = getMappedProperty(...[
+            property,
+            superProperty
+        ]);
+        let callingBack = !!mappedProperty;
+        callingBack &= isValidValue(rightObject[property]);
+        if (callingBack) return callback(...[
+            property,
+            mappedProperty
+        ]);
+    };
     forEachProperty(...[
         rightObject,
         getProperty,
-        function (property, getMappedProperty) {
-
-            var mappedProperty = getMappedProperty(...[
-                property,
-                superProperty
-            ]);
-            var callingBack = !!mappedProperty;
-            callingBack &= isValidValue(rightObject[property]);
-            if (callingBack) return callback(...[
-                property,
-                mappedProperty
-            ]);
-        },
+        setMapping,
         finạlly
     ]);
 };
@@ -228,51 +230,52 @@ BusinessObjectMapping.prototype.forEachRelation = function () {
         one &= typeof object !== "function";
         return !!one;
     };
+    let setMapping = function (property, getMappedProperty) {
+
+        var mappedProperty = getMappedProperty(...[
+            property,
+            superProperty
+        ]);
+        let callingBack = mappedProperty !== undefined;
+        callingBack &= isValidObject(rightObject[property]);
+        if (callingBack) {
+
+            var getSubProperty = getProperty;
+            var toMany = Array.isArray(mappedProperty);
+            var toOne = typeof mappedProperty === "object";
+            if (toMany) getSubProperty = mappedProperty[1]; else {
+
+                if (toOne) getSubProperty = mappedProperty.mapping;
+            }
+            var ofString = toMany;
+            if (ofString) {
+
+                ofString = typeof mappedProperty[0] === "string";
+            }
+            var hasString = toOne;
+            if (hasString) {
+
+                hasString = typeof mappedProperty.property === "string";
+            }
+            if (ofString) return callback(...[
+                property,
+                mappedProperty[0],
+                getSubProperty
+            ]); else if (hasString) return callback(...[
+                property,
+                mappedProperty.property,
+                getSubProperty
+            ]); else return callback(...[
+                property,
+                mappedProperty,
+                getSubProperty
+            ]);
+        }
+    };
     forEachProperty(...[
         rightObject,
         getProperty,
-        function (property, getMappedProperty) {
-
-            var mappedProperty = getMappedProperty(...[
-                property,
-                superProperty
-            ]);
-            var callingBack = mappedProperty !== undefined;
-            callingBack &= isValidObject(rightObject[property]);
-            if (callingBack) {
-
-                var getSubProperty = getProperty;
-                var toMany = Array.isArray(mappedProperty);
-                var toOne = typeof mappedProperty === "object";
-                if (toMany) getSubProperty = mappedProperty[1]; else {
-
-                    if (toOne) getSubProperty = mappedProperty.mapping;
-                }
-                var ofString = toMany;
-                if (ofString) {
-
-                    ofString = typeof mappedProperty[0] === "string";
-                }
-                var hasString = toOne;
-                if (hasString) {
-
-                    hasString = typeof mappedProperty.property === "string";
-                }
-                if (ofString) return callback(...[
-                    property,
-                    mappedProperty[0],
-                    getSubProperty
-                ]); else if (hasString) return callback(...[
-                    property,
-                    mappedProperty.property,
-                    getSubProperty
-                ]); else return callback(...[
-                    property,
-                    mappedProperty,
-                    getSubProperty
-                ]);
-            }
-        },
+        setMapping,
         finạlly
     ]);
 };
@@ -287,29 +290,30 @@ BusinessObjectMapping.prototype.map = function () {
         superProperty,
         getProperty
     ] = arguments;
+    let setMapping = function (property, mappedProperty) {
+
+        var invalidMappedProperty = typeof mappedProperty !== "string";
+        invalidMappedProperty &= typeof mappedProperty !== "function";
+        if (invalidMappedProperty) throw new Error("Invalid property name");
+        if (rtl) {
+
+            if (typeof mappedProperty === "function") {
+
+                mappedProperty(leftObject, rightObject[property]);
+            } else leftObject[mappedProperty] = rightObject[property];
+        } else {
+
+            if (typeof mappedProperty === "function") {
+
+                rightObject[property] = mappedProperty(leftObject);
+            } else rightObject[property] = leftObject[mappedProperty];
+        }
+    };
     if (leftObject) self.forEachAttribute(...[
         rightObject,
         superProperty,
         getProperty,
-        function (property, mappedProperty) {
-
-            var invalidMappedProperty = typeof mappedProperty !== "string";
-            invalidMappedProperty &= typeof mappedProperty !== "function";
-            if (invalidMappedProperty) throw new Error("Invalid property name");
-            if (rtl) {
-
-                if (typeof mappedProperty === "function") {
-
-                    mappedProperty(leftObject, rightObject[property]);
-                } else leftObject[mappedProperty] = rightObject[property];
-            } else {
-
-                if (typeof mappedProperty === "function") {
-
-                    rightObject[property] = mappedProperty(leftObject);
-                } else rightObject[property] = leftObject[mappedProperty];
-            }
-        }
+        setMapping
     ]);
 };
 
@@ -322,17 +326,18 @@ BusinessObjectMapping.prototype.deepMap = function () {
         superProperty,
         getProperty
     ] = arguments;
+    let setMapping = function (property, mappedProperty) {
+
+        if (typeof mappedProperty === "function") {
+
+            mappedProperty(leftObject, rightObject[property]);
+        }
+    };
     if (leftObject) self.forEachRelation(...[
         rightObject,
         superProperty,
         getProperty,
-        function (property, mappedProperty) {
-
-            if (typeof mappedProperty === "function") {
-
-                mappedProperty(leftObject, rightObject[property]);
-            }
-        }
+        setMapping
     ]);
 };
 

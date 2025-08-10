@@ -42,7 +42,7 @@ var getRequestDelegate = function () {
         }
         var requestHandler = function (serviceObjects, error) {
 
-            var callingBack = typeof setServiceObjects === "function";
+            let callingBack = typeof setServiceObjects === "function";
             if (callingBack) {
 
                 callingBack &= !!setServiceObjects(serviceObjects, error);
@@ -90,7 +90,7 @@ var getFetchDelegate = function () {
         var resource = null;
         var fetchHandler = function (updated_resource, error) {
 
-            var callingBack = typeof setResourceInfo === "function";
+            let callingBack = typeof setResourceInfo === "function";
             if (callingBack) {
 
                 callingBack &= !!setResourceInfo(resource, error);
@@ -134,18 +134,17 @@ var getObjectsByIDFunc = function (modelController, options) {
 
             gettingObjects &= typeof modelController.getObjects === "function";
         }
-        if (gettingObjects) modelController.getObjects(...[
-            { getObjectQuery: () => queryByID },
-            modelEntity,
-            function (result, error) {
+        if (gettingObjects) modelController.getObjects({
 
-                var many = Array.isArray(result);
-                callback(...[
-                    many ? result : result && result.modelObjects,
-                    error
-                ]);
-            }
-        ]);
+            getObjectQuery: () => queryByID
+        }, modelEntity, function (result, error) {
+
+            var many = Array.isArray(result);
+            callback(...[
+                many ? result : result && result.modelObjects,
+                error
+            ]);
+        });
     };
 };
 

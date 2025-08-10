@@ -44,7 +44,7 @@ var getUseReturn = function () {
 
                 if (typeof arguments[j] !== "function") {
 
-                    throw new Error("Invalid begin parameters");
+                    throw new Error("Invalid middleware parameters");
                 }
             }
             begin = arguments;
@@ -129,7 +129,7 @@ var BusinessLanguage = function (options) {
         var withoutCallback = typeof callback !== "function";
         if (withoutOperation || withoutCallback) {
 
-            throw new Error("Invalid watch parameters");
+            throw new Error("Invalid operation watcher parameters");
         }
         if (!watchers[operation]) watchers[operation] = [];
         watchers[operation].push(callback);
@@ -138,10 +138,7 @@ var BusinessLanguage = function (options) {
     self.if = function () {
 
         var condition = arguments[0];
-        return getIfReturn.apply(self, [
-            beginConditions,
-            condition
-        ]);
+        return getIfReturn.apply(self, [beginConditions, condition]);
     };
     self.begin = function () {
 
@@ -163,20 +160,20 @@ var BusinessLanguage = function (options) {
 
                         if (typeof arguments[i] !== "function") {
 
-                            throw new Error("Invalid delegate function");
+                            throw new Error("Invalid external logic function");
                         }
                         delegates[operations[i - 1]] = arguments[i];
                     }
-                } else throw new Error("Invalid begin parameters");
+                } else throw new Error("Invalid operation parameters");
             }
-        } else throw new Error("Invalid begin parameters");
+        } else throw new Error("Invalid operation parameters");
         return self;
     };
     self.use = function (middleware) {
 
         if (typeof middleware !== "function") {
 
-            throw new Error("Invalid behaviour middleware function");
+            throw new Error("Invalid middleware function");
         }
         var begin = null;
         return getUseReturn.apply(self, [

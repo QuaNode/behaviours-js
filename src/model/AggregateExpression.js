@@ -46,8 +46,8 @@ var AggregateExpression = function (options) {
     if (one) fieldValue = [fieldValue];
     fieldValue.forEach(function (computationOperator) {
 
-        var func = typeof computationOperator === "function";
-        if (func && !isValidOperator(...[
+        var isFunc = typeof computationOperator === "function";
+        if (isFunc && !isValidOperator(...[
             ComputationOperators,
             computationOperator
         ])) {

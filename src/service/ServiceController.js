@@ -80,35 +80,17 @@ var getQueryByIDCallback = function () {
         save,
         objectAttributesMethod
     } = options;
-    return (modelObjects) => serviceObjectMapping.mapServiceObject(...[
-        serviceObjects[index],
-        objectMetadata,
-        modelEntity &&
-        modelEntity[objectAttributesMethod](),
-        Array.isArray(modelObjects) ? modelObjects : [],
-        function (modelObject, op) {
+    var mapNextServiceObject = function (modelObject, op) {
 
-            var next = function () {
+        var next = function () {
 
-                var continuing = (index + 1) < serviceObjects.length;
-                var saving = index % 1000 === 0;
-                saving |= index === (serviceObjects.length - 1);
-                if (modelEntity && saving) {
+            var continuing = (index + 1) < serviceObjects.length;
+            var saving = index % 1000 === 0;
+            saving |= index === (serviceObjects.length - 1);
+            if (modelEntity && saving) {
 
-                    var validSave = typeof save === "function";
-                    if (validSave) save(function () {
-
-                        if (continuing) queryByID(...[
-                            index + 1,
-                            serviceObjects,
-                            objectMetadata,
-                            callback,
-                            options,
-                            serviceObjectMapping,
-                            modelEntity
-                        ]); else callback();
-                    }); else throw new Error("Invalid save function");
-                } else if (continuing) queryByID(...[
+                var validSave = typeof save === "function";
+                var queryNext = () => queryByID(...[
                     index + 1,
                     serviceObjects,
                     objectMetadata,
@@ -116,18 +98,30 @@ var getQueryByIDCallback = function () {
                     options,
                     serviceObjectMapping,
                     modelEntity
-                ]); else callback();
-            };
-            if (modelEntity && op === "insert") {
+                ]);
+                if (validSave) save(function () {
 
-                var adding = typeof addObjects === "function";
-                if (adding) addObjects(...[
-                    [modelObject],
-                    modelEntity,
-                    () => next()
-                ]); else throw new Error("Invalid add objects function");
-            } else next();
-        }
+                    if (continuing) queryNext(); else callback();
+                }); else throw new Error("Invalid save function");
+            } else if (continuing) queryNext(); else callback();
+        };
+        if (modelEntity && op === "insert") {
+
+            var adding = typeof addObjects === "function";
+            if (adding) addObjects(...[
+                [modelObject],
+                modelEntity,
+                () => next()
+            ]); else throw new Error("Invalid add objects function");
+        } else next();
+    };
+    return (modelObjects) => serviceObjectMapping.mapServiceObject(...[
+        serviceObjects[index],
+        objectMetadata,
+        modelEntity &&
+        modelEntity[objectAttributesMethod](),
+        Array.isArray(modelObjects) ? modelObjects : [],
+        mapNextServiceObject
     ]);
 };
 
@@ -155,32 +149,7 @@ var queryByID = function () {
             modelEntity &&
             modelEntity[objectAttributesMethod]()
         ]);
-        if (idServiceValue) {
-
-            var identifying = typeof getObjectsByID === "function";
-            if (identifying) getObjectsByID(...[
-                objectMetadata.id,
-                idServiceValue,
-                modelEntity,
-                getQueryByIDCallback(...[
-                    index,
-                    serviceObjects,
-                    objectMetadata,
-                    callback,
-                    options,
-                    serviceObjectMapping,
-                    modelEntity
-                ])
-            ]); else getQueryByIDCallback(...[
-                index,
-                serviceObjects,
-                objectMetadata,
-                callback,
-                options,
-                serviceObjectMapping,
-                modelEntity
-            ])();
-        } else getQueryByIDCallback(...[
+        var queryByIDCallback = getQueryByIDCallback(...[
             index,
             serviceObjects,
             objectMetadata,
@@ -188,7 +157,17 @@ var queryByID = function () {
             options,
             serviceObjectMapping,
             modelEntity
-        ])();
+        ]);
+        if (idServiceValue) {
+
+            var identifying = typeof getObjectsByID === "function";
+            if (identifying) getObjectsByID(...[
+                objectMetadata.id,
+                idServiceValue,
+                modelEntity,
+                queryByIDCallback
+            ]); else queryByIDCallback();
+        } else queryByIDCallback();
     }, 0);
 };
 
@@ -220,9 +199,7 @@ var mapAndSync = function () {
         var modelEntity = null;
         var many = objectMetadata.model.length > 0;
         var creating = typeof createModelEntity === "function";
-        if (many && creating) modelEntity = createModelEntity(...[
-            objectMetadata.model
-        ]);
+        if (many && creating) modelEntity = createModelEntity(objectMetadata.model);
         if (many) {
 
             if (!creating) {
@@ -331,23 +308,25 @@ var createRequest = function () {
     if (!serviceEndPoint.consumableByAdapter(...[
         serviceAdapter
     ])) serviceAdapter = serviceEndPoint.adapter();
-    serviceAdapter.sendRequest(...[
-        request,
-        (response, error) => reflectOnModel(...[
-            response,
-            serviceEndPoint.responseMetadata,
-            function (serviceObjects) {
+    var getServiceCallback = function (response, error) {
 
-                var callingBack = typeof callback === "function";
-                if (callingBack) callback(...[
-                    serviceObjects ||
-                    response,
-                    error
-                ]);
-            },
-            options
-        ])
+        return function (serviceObjects) {
+
+            var callingBack = typeof callback === "function";
+            if (callingBack) callback(...[
+                serviceObjects ||
+                response,
+                error
+            ]);
+        };
+    };
+    var onResponse = (response, error) => reflectOnModel(...[
+        response,
+        serviceEndPoint.responseMetadata,
+        getServiceCallback(response, error),
+        options
     ]);
+    serviceAdapter.sendRequest(request, onResponse);
     return serviceAdapter;
 };
 

@@ -32,9 +32,7 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
             beginConditions: {},
         };
         var self = init.apply(this, [languageParameters]).self();
-        var businessBehaviourCore = new BusinessBehaviourCore(...[
-            languageParameters
-        ]);
+        var businessBehaviourCore = new BusinessBehaviourCore(languageParameters);
         var type = null;
         self.name = options.name;
         self.priority = options.priority;
@@ -56,9 +54,7 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
 
                 for (var behaviourType in BusinessBehaviourType) {
 
-                    if (BusinessBehaviourType.hasOwnProperty(...[
-                        behaviourType
-                    ])) {
+                    if (BusinessBehaviourType.hasOwnProperty(behaviourType)) {
 
                         var typë = BusinessBehaviourType[behaviourType];
                         if (typë === typeParameter) {
@@ -84,14 +80,14 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
             self.state.businessOperations = copy(businessOperations);
             Object.keys(languageParameters.delegates).every(function () {
 
-                var [delegate] = arguments;
+                var [operationKey] = arguments;
                 if ([
                     ...businessOperations,
                     ...serviceOperations,
                     ...modelOperations
-                ].indexOf(delegate) === -1) {
+                ].indexOf(operationKey) === -1) {
 
-                    throw new Error("Invalid operation name: " + delegate);
+                    throw new Error("Invalid operation name: " + operationKey);
                 }
             });
         };
@@ -102,24 +98,15 @@ var BusinessBehaviour = module.exports.BusinessBehaviour = define(function (init
         } = businessBehaviourCore;
         self.beginServiceOperation = function () {
 
-            return beginServiceOperation.apply(...[
-                self,
-                arguments
-            ]);
+            return beginServiceOperation.apply(self, arguments);
         };
         self.beginModelOperation = function () {
 
-            return beginModelOperation.apply(...[
-                self,
-                arguments
-            ]);
+            return beginModelOperation.apply(self, arguments);
         };
         self.beginBusinessOperation = function () {
 
-            return beginBusinessOperation.apply(...[
-                self,
-                arguments
-            ]);
+            return beginBusinessOperation.apply(self, arguments);
         };
     };
 }).extend(BusinessLanguage).defaults({});
@@ -133,9 +120,7 @@ BusinessBehaviour.prototype.hasMandatoryBehaviour = function () {
 
         if (self.mandatoryBehaviour instanceof BusinessBehaviour) {
 
-            return self.mandatoryBehaviour.hasMandatoryBehaviour(...[
-                behaviour
-            ]);
+            return self.mandatoryBehaviour.hasMandatoryBehaviour(behaviour);
         } else return false;
     }
 };
