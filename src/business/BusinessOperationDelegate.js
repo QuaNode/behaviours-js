@@ -4,7 +4,7 @@
 
 var { BusinessObjectMapping } = require("./BusinessObjectMapping.js");
 
-var getInputObjectsReturn = function () {
+var getInputObjectsShallowCopy = function () {
 
     var [
         objects,
@@ -17,20 +17,21 @@ var getInputObjectsReturn = function () {
         var cb = arguments[0];
         var push = function (index, inputObjects) {
 
+            var pushInputObject = function (inputObject) {
+
+                inputObjects.push(inputObject);
+                if (objects[index + 1]) {
+
+                    push(index + 1, inputObjects);
+                } else if (typeof cb === "function") cb(inputObjects);
+            };
             setTimeout(function () {
 
                 getInputObject(...[
                     objects[index],
                     superProperty,
                     getSubProperty
-                ])(function (inputObject) {
-
-                    inputObjects.push(inputObject);
-                    if (objects[index + 1]) {
-
-                        push(index + 1, inputObjects);
-                    } else if (typeof cb === "function") cb(inputObjects);
-                });
+                ])(pushInputObject);
             }, 0);
         };
         if (Array.isArray(objects)) {
@@ -50,7 +51,7 @@ var getInputObjectsReturn = function () {
     };
 };
 
-var getInputObjectReturn = function () {
+var getInputObjectShallowCopy = function () {
 
     var [
         object,
@@ -89,7 +90,7 @@ var getInputObjectReturn = function () {
     };
 };
 
-var getBusinessObjectsReturn = function () {
+var getBusinessObjectsShallowCopy = function () {
 
     var [
         objects,
@@ -102,20 +103,21 @@ var getBusinessObjectsReturn = function () {
         var cb = arguments[0];
         var push = function (index, businessObjects) {
 
+            var pushBusinessObject = function (businessObject) {
+
+                businessObjects.push(businessObject);
+                if (objects[index + 1]) push(index + 1, businessObjects); else {
+
+                    if (typeof cb === "function") cb(businessObjects);
+                }
+            };
             setTimeout(function () {
 
                 getBusinessObject(...[
                     objects[index],
                     superProperty,
                     getSubProperty
-                ])(function (businessObject) {
-
-                    businessObjects.push(businessObject);
-                    if (objects[index + 1]) push(index + 1, businessObjects); else {
-
-                        if (typeof cb === "function") cb(businessObjects);
-                    }
-                });
+                ])(pushBusinessObject);
             }, 0);
         };
         if (objects[0]) push(0, []); else if (typeof cb === "function") cb([]);
@@ -138,7 +140,7 @@ var mapObjects = function () {
                 superProperty,
                 getSubProperty
             ] = arguments;
-            return getBusinessObjectsReturn(...[
+            return getBusinessObjectsShallowCopy(...[
                 objects,
                 superProperty,
                 getSubProperty,
@@ -151,17 +153,20 @@ var mapObjects = function () {
         ]);
         var settingBusinessObject_s = typeof setBusinessObjects === "function";
         var fromMany = Array.isArray(fromObjects);
-        if (settingBusinessObject_s) (fromMany ? getBusinessObjects : getBusinessObject)(...[
-            fromObjects
-        ])(function (toObjects) {
+        if (settingBusinessObject_s) {
 
-            setBusinessObjects(toObjects);
-            callback(toObjects);
-        });
+            let getShallowCopy = fromMany ? getBusinessObjects : getBusinessObject;
+            let shallowCopy = getShallowCopy(fromObjects);
+            shallowCopy(function (toObjects) {
+
+                setBusinessObjects(toObjects);
+                callback(toObjects);
+            });
+        } else callback();
     };
 };
 
-var getBusinessObjectReturn_To = function () {
+var getBusinessObjectShallowCopy_To = function () {
 
     var [
         object,
@@ -199,7 +204,7 @@ var getBusinessObjectReturn_To = function () {
     };
 };
 
-var getBusinessObjectReturn_Between = function () {
+var getBusinessObjectShallowCopy_Between = function () {
 
     var [
         object,
@@ -275,7 +280,7 @@ BusinessOperationDelegate.prototype.mapFromObjects = function () {
                 superProperty,
                 getSubProperty
             ] = arguments;
-            return getInputObjectsReturn(...[
+            return getInputObjectsShallowCopy(...[
                 objects,
                 superProperty,
                 getSubProperty,
@@ -289,7 +294,7 @@ BusinessOperationDelegate.prototype.mapFromObjects = function () {
                 superProperty,
                 getSubProperty
             ] = arguments;
-            return getInputObjectReturn(...[
+            return getInputObjectShallowCopy(...[
                 object,
                 superProperty,
                 getSubProperty,
@@ -299,82 +304,75 @@ BusinessOperationDelegate.prototype.mapFromObjects = function () {
                 getInputObject
             ]);
         };
-        if (typeof setInputObjects === "function") getInputObjects(...[
-            fromObjects
-        ])(function (inputObjects) {
+        if (typeof setInputObjects === "function") {
 
-            setInputObjects(inputObjects);
-            callback();
-        });
+            let shallowCopy = getInputObjects(fromObjects);
+            shallowCopy(function (inputObjects) {
+
+                setInputObjects(inputObjects);
+                callback();
+            });
+        } else callback();
     };
 };
 
 BusinessOperationDelegate.prototype.mapToObjects = function () {
 
     var [
-        fromObjects,
+        [fromObjects],
         getProperty,
         callback
     ] = arguments;
-    return mapObjects(...[
-        fromObjects,
-        function (getBusinessObjects) {
+    return mapObjects(fromObjects, function (getBusinessObjects) {
 
-            var getBusinessObject = function () {
+        var getBusinessObject = function () {
 
-                var [
-                    object,
-                    superProperty,
-                    getSubProperty
-                ] = arguments;
-                return getBusinessObjectReturn_To(...[
-                    object,
-                    superProperty,
-                    getSubProperty,
-                    getProperty,
-                    getBusinessObjects,
-                    getBusinessObject
-                ]);
-            };
-            return getBusinessObject;
-        },
-        callback
-    ]);
+            var [
+                object,
+                superProperty,
+                getSubProperty
+            ] = arguments;
+            return getBusinessObjectShallowCopy_To(...[
+                object,
+                superProperty,
+                getSubProperty,
+                getProperty,
+                getBusinessObjects,
+                getBusinessObject
+            ]);
+        };
+        return getBusinessObject;
+    }, callback);
 };
 
 BusinessOperationDelegate.prototype.mapBetweenObjects = function () {
 
     var [
-        fromObjects,
-        inputObjects,
+        [fromObjects, inputObjects],
         getProperty,
         callback
     ] = arguments;
-    return mapObjects(...[
-        fromObjects,
-        function () {
+    return mapObjects(fromObjects, function () {
 
-            var [_, getIdentificationAttributes] = arguments;
-            var getBusinessObject = function () {
+        var [_, getIdentificationAttributes] = arguments;
+        var getBusinessObject = function () {
 
-                var [
-                    object,
-                    superProperty,
-                    getSubProperty
-                ] = arguments;
-                return getBusinessObjectReturn_Between(...[
-                    object,
-                    superProperty,
-                    getSubProperty,
-                    getProperty,
-                    inputObjects,
-                    getIdentificationAttributes
-                ]);
-            };
-            return getBusinessObject;
-        },
-        callback
-    ]);
+            var [
+                object,
+                superProperty,
+                getSubProperty
+            ] = arguments;
+            return getBusinessObjectShallowCopy_Between(...[
+                object,
+                superProperty,
+                getSubProperty,
+                getProperty,
+                inputObjects,
+                getIdentificationAttributes
+            ]);
+        };
+        return getBusinessObject;
+    }, callback);
 };
 
 module.exports.BusinessOperationDelegate = BusinessOperationDelegate;

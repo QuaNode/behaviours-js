@@ -14,14 +14,15 @@ var getCancelFunc = function () {
 
         behaviourQueue.forEach(function (queueBehaviour) {
 
-            if (behaviour.hasMandatoryBehaviour(...[
-                queueBehaviour
-            ])) getCancelFunc.apply(self, [
-                queueBehaviour,
-                cancelExecutingBehaviour,
-                behaviourQueue,
-                executingBehaviourQueue
-            ])();
+            if (behaviour.hasMandatoryBehaviour(queueBehaviour)) {
+
+                getCancelFunc.apply(self, [
+                    queueBehaviour,
+                    cancelExecutingBehaviour,
+                    behaviourQueue,
+                    executingBehaviourQueue
+                ])();
+            }
         });
         if (executingBehaviourQueue.indexOf(behaviour) > -1) {
 
@@ -33,14 +34,15 @@ var getCancelFunc = function () {
                 behaviour.state.error = new Error(cancellingReason);
             }
             var cancelling = typeof cancelExecutingBehaviour === "function";
-            if (cancelling) cancelExecutingBehaviour(...[
-                behaviour
+            if (cancelling) cancelExecutingBehaviour(behaviour);
+        } else if (behaviourQueue.indexOf(behaviour) > -1) {
+
+            self.dequeue(...[
+                behaviour,
+                ignoreSetComplete,
+                cancellingReason || "cancelled"
             ]);
-        } else if (behaviourQueue.indexOf(behaviour) > -1) self.dequeue(...[
-            behaviour,
-            ignoreSetComplete,
-            cancellingReason || "cancelled"
-        ]);
+        }
     };
 };
 
@@ -156,23 +158,18 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
             behaviourQueue,
             executingBehaviourQueue
         ]);
-        var index = behaviourQueue.indexOf(...[
-            behaviour
-        ]);
+        var index = behaviourQueue.indexOf(behaviour);
         if (behaviour.timeout > 0) {
 
-            behaviour._timeout = setTimeout(...[
-                function () {
+            behaviour._timeout = setTimeout(function () {
 
-                    behaviour._timeout = undefined;
-                    delete behaviour._timeout;
-                    var length = behaviourQueue.length;
-                    var reason = "Behaviour timeout at index " + index;
-                    reason += " while " + length + " in the queue";
-                    cancelFunc(false, reason);
-                },
-                behaviour.timeout * 1000
-            ]);
+                behaviour._timeout = undefined;
+                delete behaviour._timeout;
+                var length = behaviourQueue.length;
+                var reason = "Behaviour timeout at index " + index;
+                reason += " while " + length + " in the queue";
+                cancelFunc(false, reason);
+            }, behaviour.timeout * 1000);
         }
         if (index === behaviourQueue.length - 1) next();
         return cancelFunc;
@@ -262,9 +259,7 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
                 currentBehaviour
             ]);
         })) next();
-        var index = executingBehaviourQueue.indexOf(...[
-            currentBehaviour
-        ]);
+        var index = executingBehaviourQueue.indexOf(currentBehaviour);
         if (index > -1) executingBehaviourQueue.splice(index, 1);
     };
 };

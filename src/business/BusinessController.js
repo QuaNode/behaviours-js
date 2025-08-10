@@ -107,9 +107,7 @@ var BusinessController = function (options) {
             throw new Error("Invalid behaviour");
         }
         var ignoring = ignoreBehaviours
-        ignoring |= businessBehaviourQueue.isEnqueued(...[
-            behaviour
-        ]);
+        ignoring |= businessBehaviourQueue.isEnqueued(behaviour);
         if (ignoring) return () => { };
         behaviour.getProperty = getProperty || ((property) => property);
         behaviour.callback = callback;

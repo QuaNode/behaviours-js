@@ -8,26 +8,24 @@ var getParsedValue = function (value, type) {
 
     switch (type) {
 
-        case Number:
-            try {
+        case Number: try {
 
-                if (typeof value === "string") {
+            if (typeof value === "string") {
 
-                    var floating = value.indexOf(".") > -1;
-                    if (floating) value = parseFloat(value); else {
+                var floating = value.indexOf(".") > -1;
+                if (floating) value = parseFloat(value); else {
 
-                        value = parseInt(value);
-                    }
+                    value = parseInt(value);
                 }
-                var invalid = isNaN(value);
-                invalid |= typeof value !== "number";
-                if (invalid) value = null;
-            } catch (e) {
-
-                debug(e);
-                value = null;
             }
-            break;
+            var invalid = isNaN(value);
+            invalid |= typeof value !== "number";
+            if (invalid) value = null;
+        } catch (e) {
+
+            debug(e);
+            value = null;
+        } break;
         case Boolean:
             if (typeof value === "string") {
 
@@ -40,17 +38,17 @@ var getParsedValue = function (value, type) {
                     return false;
                 } else return null;
             }
-        case Date:
-            try {
+        case Date: try {
 
-                if (isNaN(Date.parse(value))) value = null;
-                else value = new Date(value);
-            } catch (e) {
+            if (isNaN(Date.parse(value))) {
 
-                debug(e);
                 value = null;
-            }
-            break;
+            } else value = new Date(value);
+        } catch (e) {
+
+            debug(e);
+            value = null;
+        } break;
         default:
             if (Array.isArray(type)) {
 
@@ -63,10 +61,7 @@ var getParsedValue = function (value, type) {
 
                         if (type[0]) {
 
-                            return getParsedValue(...[
-                                välue,
-                                type[0]
-                            ]);
+                            return getParsedValue(välue, type[0]);
                         }
                         return välue;
                     });
@@ -125,8 +120,7 @@ var getServiceValue = function () {
                 extracting &= ofKey === serviceAttributeName;
             }
             serviceValue = serviceObject[k][serviceAttributeName];
-            if (serviceValue) break;
-            else if (extracting) {
+            if (serviceValue) break; else if (extracting) {
 
                 serviceValue = serviceObject[k][value];
                 break;

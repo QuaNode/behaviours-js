@@ -6,7 +6,7 @@ var { OperationDelegateExecutive } = require("./OperationDelegateExecutive.js");
 var { BusinessOperation } = require("./BusinessBehaviourCycle.js");
 var parse = require("parseparams");
 
-var ifCondition = function (operation, conditions) {
+var checkIf = function (operation, conditions) {
 
     var lazy = typeof conditions[operation] === "function";
     var scalar = typeof conditions[operation] === "boolean";
@@ -17,7 +17,7 @@ var ifCondition = function (operation, conditions) {
     return true;
 };
 
-var middleware = function () {
+var runMiddleware = function () {
 
     var [
         operation,
@@ -33,13 +33,13 @@ var middleware = function () {
 
         middling &= index < middlewares[operation].length;
     }
-    if (middling && ifCondition(operation, useConditions)) {
+    if (middling && checkIf(operation, useConditions)) {
 
         var async = parse(middlewares[operation][index])[2] === "next";
         if (async) middlewares[operation][index](...[
             operation,
             businessController,
-            () => middleware(...[
+            () => runMiddleware(...[
                 operation,
                 businessController,
                 index + 1,
@@ -68,21 +68,21 @@ var getOperationFunc = function (attribute) {
     };
 };
 
-var getOperationCancelFunc = function (delegate) {
+var getOperationCancelFunc = function (internalDelegate) {
 
     return function () {
 
         this.apply = () => { };
-        return delegate();
+        return internalDelegate();
     };
 };
 
 var getServiceOperation = function () {
 
-    var [
+    let [
         operationDelegateExecutive,
         serviceOperation,
-        delegate
+        internalDelegate
     ] = arguments;
     return {
 
@@ -100,7 +100,7 @@ var getServiceOperation = function () {
             } = operationDelegateExecutive;
             executeServiceOperation.apply(this, [
                 serviceOperation,
-                delegate,
+                internalDelegate,
                 parameters,
                 service,
                 callback,
@@ -113,16 +113,16 @@ var getServiceOperation = function () {
         stream: getOperationFunc("service"),
         append: getOperationFunc("append"),
         callback: getOperationFunc("callback"),
-        cancel: getOperationCancelFunc(delegate)
+        cancel: getOperationCancelFunc(internalDelegate)
     };
 };
 
 var getModelOperation = function () {
 
-    var [
+    let [
         operationDelegateExecutive,
         modelOperation,
-        delegate
+        internalDelegate
     ] = arguments;
     return {
 
@@ -143,7 +143,7 @@ var getModelOperation = function () {
             } = operationDelegateExecutive;
             executeModelOperation.apply(this, [
                 modelOperation,
-                delegate,
+                internalDelegate,
                 queryOrObjects,
                 entity,
                 callback,
@@ -157,16 +157,16 @@ var getModelOperation = function () {
         entity: getOperationFunc("entity"),
         append: getOperationFunc("append"),
         callback: getOperationFunc("callback"),
-        cancel: getOperationCancelFunc(delegate)
+        cancel: getOperationCancelFunc(internalDelegate)
     };
 };
 
 var getServiceMappingOperation = function () {
 
-    var [
+    let [
         operationDelegateExecutive,
         businessOperation,
-        delegate
+        internalDelegate
     ] = arguments;
     return {
 
@@ -181,21 +181,21 @@ var getServiceMappingOperation = function () {
             } = operationDelegateExecutive;
             executeServiceMappingOperation.apply(this, [
                 businessOperation,
-                delegate,
+                internalDelegate,
                 callback
             ]);
         },
         callback: getOperationFunc("callback"),
-        cancel: getOperationCancelFunc(delegate)
+        cancel: getOperationCancelFunc(internalDelegate)
     };
 };
 
 var getModelMappingOperation = function () {
 
-    var [
+    let [
         operationDelegateExecutive,
         businessOperation,
-        delegate
+        internalDelegate
     ] = arguments;
     return {
 
@@ -211,23 +211,23 @@ var getModelMappingOperation = function () {
             } = operationDelegateExecutive;
             executeModelMappingOperation.apply(this, [
                 businessOperation,
-                delegate,
+                internalDelegate,
                 identifiers,
                 callback
             ]);
         },
         identifiers: getOperationFunc("identifiers"),
         callback: getOperationFunc("callback"),
-        cancel: getOperationCancelFunc(delegate)
+        cancel: getOperationCancelFunc(internalDelegate)
     };
 };
 
 var getErrorHandlingOperation = function () {
 
-    var [
+    let [
         operationDelegateExecutive,
         businessOperation,
-        delegate
+        internalDelegate
     ] = arguments;
     return {
 
@@ -242,12 +242,68 @@ var getErrorHandlingOperation = function () {
             } = operationDelegateExecutive;
             executeErrorHandlingOperation.apply(this, [
                 businessOperation,
-                delegate,
+                internalDelegate,
                 error
             ]);
         },
         error: getOperationFunc("error"),
-        cancel: getOperationCancelFunc(delegate)
+        cancel: getOperationCancelFunc(internalDelegate)
+    };
+};
+
+var getBusinessOperation = function () {
+
+    let [
+        operationDelegateExecutive,
+        businessOperation,
+        internalDelegate
+    ] = arguments;
+    let getOperation = {
+        [BusinessOperation.SERVICEOBJECTMAPPING]: getServiceMappingOperation,
+        [BusinessOperation.MODELOBJECTMAPPING]: getModelMappingOperation,
+        [BusinessOperation.ERRORHANDLING]: getErrorHandlingOperation
+    }[businessOperation];
+    if (typeof getOperation !== "function") {
+
+        throw new Error("Invalid business operation");
+    }
+    return getOperation(...[
+        operationDelegateExecutive,
+        businessOperation,
+        internalDelegate
+    ]);
+};
+
+var getNext = function () {
+
+    let [
+        operationDelegateExecutive,
+        operationKey,
+        beginConditions,
+        businessController,
+        getOperation,
+        delegates,
+        delegateExisted,
+        internalDelegate
+    ] = arguments;
+    return function () {
+
+        if (delegateExisted && checkIf(...[
+            operationKey,
+            beginConditions
+        ])) {
+
+            let operation = getOperation(...[
+                operationDelegateExecutive,
+                operationKey,
+                internalDelegate
+            ]);
+            delegates[operationKey](...[
+                operationKey,
+                businessController,
+                operation
+            ]);
+        } else if (delegateExisted) internalDelegate();
     };
 };
 
@@ -265,31 +321,27 @@ var BusinessBehaviourCore = function (options) {
     });
     self.beginServiceOperation = function () {
 
-        var [
+        let [
             serviceOperation,
             businessController,
-            delegate
+            internalDelegate
         ] = arguments;
-        var delegateExisted = !!delegates[serviceOperation];
-        middleware(...[
+        let delegateExisted = !!delegates[serviceOperation];
+        let next = getNext(...[
+            operationDelegateExecutive,
+            serviceOperation,
+            beginConditions,
+            businessController,
+            getServiceOperation,
+            delegates,
+            delegateExisted,
+            internalDelegate
+        ]);
+        runMiddleware(...[
             serviceOperation,
             businessController,
             0,
-            function () {
-
-                if (delegateExisted && ifCondition(...[
-                    serviceOperation,
-                    beginConditions
-                ])) delegates[serviceOperation](...[
-                    serviceOperation,
-                    businessController,
-                    getServiceOperation(...[
-                        operationDelegateExecutive,
-                        serviceOperation,
-                        delegate
-                    ])
-                ]); else if (delegateExisted) delegate();
-            },
+            next,
             middlewares,
             useConditions
         ]);
@@ -297,31 +349,27 @@ var BusinessBehaviourCore = function (options) {
     };
     self.beginModelOperation = function () {
 
-        var [
+        let [
             modelOperation,
             businessController,
-            delegate
+            internalDelegate
         ] = arguments;
-        var delegateExisted = !!delegates[modelOperation];
-        middleware(...[
+        let delegateExisted = !!delegates[modelOperation];
+        let next = getNext(...[
+            operationDelegateExecutive,
+            modelOperation,
+            beginConditions,
+            businessController,
+            getModelOperation,
+            delegates,
+            delegateExisted,
+            internalDelegate
+        ]);
+        runMiddleware(...[
             modelOperation,
             businessController,
             0,
-            function () {
-
-                if (delegateExisted && ifCondition(...[
-                    modelOperation,
-                    beginConditions
-                ])) delegates[modelOperation](...[
-                    modelOperation,
-                    businessController,
-                    getModelOperation(...[
-                        operationDelegateExecutive,
-                        modelOperation,
-                        delegate
-                    ])
-                ]); else if (delegateExisted) delegate();
-            },
+            next,
             middlewares,
             useConditions
         ]);
@@ -329,58 +377,27 @@ var BusinessBehaviourCore = function (options) {
     };
     self.beginBusinessOperation = function () {
 
-        var [
+        let [
             businessOperation,
             businessController,
-            delegate
+            internalDelegate
         ] = arguments;
-        var delegateExisted = !!delegates[businessOperation];
-        middleware(...[
+        let delegateExisted = !!delegates[businessOperation];
+        let next = getNext(...[
+            operationDelegateExecutive,
+            businessOperation,
+            beginConditions,
+            businessController,
+            getBusinessOperation,
+            delegates,
+            delegateExisted,
+            internalDelegate
+        ]);
+        runMiddleware(...[
             businessOperation,
             businessController,
             0,
-            function () {
-
-                if (delegateExisted && ifCondition(...[
-                    businessOperation,
-                    beginConditions
-                ])) switch (businessOperation) {
-
-                    case BusinessOperation.SERVICEOBJECTMAPPING:
-                        delegates[businessOperation](...[
-                            businessOperation,
-                            businessController,
-                            getServiceMappingOperation(...[
-                                operationDelegateExecutive,
-                                businessOperation,
-                                delegate
-                            ])
-                        ]);
-                        break;
-                    case BusinessOperation.MODELOBJECTMAPPING:
-                        delegates[businessOperation](...[
-                            businessOperation,
-                            businessController,
-                            getModelMappingOperation(...[
-                                operationDelegateExecutive,
-                                businessOperation,
-                                delegate
-                            ])
-                        ]);
-                        break;
-                    case BusinessOperation.ERRORHANDLING:
-                        delegates[businessOperation](...[
-                            businessOperation,
-                            businessController,
-                            getErrorHandlingOperation(...[
-                                operationDelegateExecutive,
-                                businessOperation,
-                                delegate
-                            ])
-                        ]);
-                        break;
-                } else if (delegateExisted) delegate();
-            },
+            next,
             middlewares,
             useConditions
         ]);

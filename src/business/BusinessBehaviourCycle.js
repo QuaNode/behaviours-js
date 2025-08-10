@@ -78,7 +78,7 @@ var endRunningBehaviour = function (currentBehaviour, options) {
         true
     ]);
     if (businessBehaviourQueue.suspend(currentBehaviour)) return;
-    var businessDelegate = function (getError) {
+    var endRunning = function (getError) {
 
         if (typeof getError === "function") {
 
@@ -90,15 +90,14 @@ var endRunningBehaviour = function (currentBehaviour, options) {
             BusinessOperation.ERRORHANDLING,
             true
         ]);
-        if (businessBehaviourQueue.suspend(...[
-            currentBehaviour
-        ])) return;
-        if (businessBehaviourQueue.dequeue(...[
-            currentBehaviour
-        ])) businessBehaviourQueue.finish(...[
-            currentBehaviour,
-            () => self.runNextBehaviour()
-        ]); else debug("Behaviour already dequeued, may be misuse of next()");
+        if (businessBehaviourQueue.suspend(currentBehaviour)) return;
+        if (businessBehaviourQueue.dequeue(currentBehaviour)) {
+
+            businessBehaviourQueue.finish(...[
+                currentBehaviour,
+                () => self.runNextBehaviour()
+            ]);
+        } else debug("Behaviour already dequeued, may be misuse of next()");
     };
     if (ignoreBusinessOperation(...[
         currentBehaviour,
@@ -107,8 +106,8 @@ var endRunningBehaviour = function (currentBehaviour, options) {
     ]) || !currentBehaviour.beginBusinessOperation(...[
         BusinessOperation.ERRORHANDLING,
         businessController,
-        businessDelegate
-    ])) businessDelegate();
+        endRunning
+    ])) endRunning();
 };
 
 var continueRunningBehaviour = function (currentBehaviour, options) {
@@ -127,37 +126,37 @@ var continueRunningBehaviour = function (currentBehaviour, options) {
     ]);
     if (businessBehaviourQueue.suspend(currentBehaviour)) return;
     var state = currentBehaviour.state;
+    var continueRunning = () => continueRunningBehaviour.apply(self, [
+        currentBehaviour,
+        options
+    ]);
+    var continueEnding = (businessObjects) => {
+
+        if (businessObjects) {
+
+            state.businessObjects = businessObjects;
+        }
+        endRunningBehaviour.apply(self, [currentBehaviour, options]);
+    };
     var modelOperation = state.modelOperations.pop();
     if (modelOperation) {
 
+        var internalModelDelegator = delegateModelOperation(...[
+            currentBehaviour,
+            modelOperation,
+            continueRunning
+        ]);
         if (!currentBehaviour.beginModelOperation(...[
             modelOperation,
             businessController,
-            delegateModelOperation(...[
-                currentBehaviour,
-                modelOperation,
-                () => continueRunningBehaviour.apply(self, [
-                    currentBehaviour,
-                    options
-                ])
-            ])
-        ])) continueRunningBehaviour.apply(self, [
-            currentBehaviour,
-            options
-        ]);
+            internalModelDelegator
+        ])) continueRunning();
     } else {
 
-        var businessCallback = function (businessObjects) {
-
-            if (businessObjects) {
-
-                state.businessObjects = businessObjects;
-            }
-            endRunningBehaviour.apply(self, [
-                currentBehaviour,
-                options
-            ]);
-        };
+        let internalMappingDelegator = delegateModelMappingOperation(...[
+            currentBehaviour,
+            continueEnding
+        ]);
         if (ignoreBusinessOperation(...[
             currentBehaviour,
             BusinessOperation.MODELOBJECTMAPPING,
@@ -165,11 +164,8 @@ var continueRunningBehaviour = function (currentBehaviour, options) {
         ]) || !currentBehaviour.beginBusinessOperation(...[
             BusinessOperation.MODELOBJECTMAPPING,
             businessController,
-            delegateModelMappingOperation(...[
-                currentBehaviour,
-                businessCallback
-            ])
-        ])) businessCallback();
+            internalMappingDelegator
+        ])) continueEnding();
     }
 };
 
@@ -183,27 +179,30 @@ var beginRunnigBehaviour = function (currentBehaviour, options) {
         delegateServiceMappingOperation
     } = options;
     if (businessBehaviourQueue.suspend(currentBehaviour)) return;
-    var serviceOperation = currentBehaviour.state.serviceOperations.pop();
-    var businessCallback = function () {
+    var beginRunning = () => beginRunnigBehaviour.apply(self, [
+        currentBehaviour,
+        options
+    ]);
+    var beginRunningService = function () {
 
+        var internalServiceDelegator = delegateServiceOperation(...[
+            currentBehaviour,
+            serviceOperation,
+            beginRunning
+        ]);
         if (!currentBehaviour.beginServiceOperation(...[
             serviceOperation,
             businessController,
-            delegateServiceOperation(...[
-                currentBehaviour,
-                serviceOperation,
-                () => beginRunnigBehaviour.apply(self, [
-                    currentBehaviour,
-                    options
-                ])
-            ])
-        ])) beginRunnigBehaviour.apply(self, [
-            currentBehaviour,
-            options
-        ]);
+            internalServiceDelegator
+        ])) beginRunning();
     };
+    var serviceOperation = currentBehaviour.state.serviceOperations.pop();
     if (serviceOperation) {
 
+        let internalMappingDelegator = delegateServiceMappingOperation(...[
+            currentBehaviour,
+            beginRunningService
+        ]);
         if (ignoreBusinessOperation(...[
             currentBehaviour,
             BusinessOperation.SERVICEOBJECTMAPPING,
@@ -211,11 +210,8 @@ var beginRunnigBehaviour = function (currentBehaviour, options) {
         ]) || !currentBehaviour.beginBusinessOperation(...[
             BusinessOperation.SERVICEOBJECTMAPPING,
             businessController,
-            delegateServiceMappingOperation(...[
-                currentBehaviour,
-                businessCallback
-            ])
-        ])) businessCallback();
+            internalMappingDelegator
+        ])) beginRunningService();
     } else continueRunningBehaviour.apply(self, [
         currentBehaviour,
         options
@@ -262,23 +258,17 @@ var BusinessBehaviourCycle = function (options) {
                 modelOperations,
                 businessOperations
             ]);
-            switch (currentBehaviour.getType()) {
+            var run = {
+                [BusinessBehaviourType.ONLINESYNC]: beginRunnigBehaviour,
+                [BusinessBehaviourType.ONLINEACTION]: beginRunnigBehaviour,
+                [BusinessBehaviourType.OFFLINESYNC]: continueRunningBehaviour,
+                [BusinessBehaviourType.OFFLINEACTION]: continueRunningBehaviour,
+            }[currentBehaviour.getType()];
+            if (typeof run !== "function") {
 
-                case BusinessBehaviourType.ONLINESYNC:
-                case BusinessBehaviourType.ONLINEACTION:
-                    beginRunnigBehaviour.apply(self, [
-                        currentBehaviour,
-                        options
-                    ]);
-                    break;
-                case BusinessBehaviourType.OFFLINESYNC:
-                case BusinessBehaviourType.OFFLINEACTION:
-                    continueRunningBehaviour.apply(self, [
-                        currentBehaviour,
-                        options
-                    ]);
-                    break;
+                throw new Error("Invalid behaviour type");
             }
+            run.apply(self, [currentBehaviour, options]);
         }
     };
 };
