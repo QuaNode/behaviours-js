@@ -1,6 +1,8 @@
 /*jslint node: true */
 "use strict";
 
+var debug = require("debug")("backend:BusinessBehaviourQueue");
+
 var getCancelFunc = function () {
 
     var self = this;
@@ -8,7 +10,7 @@ var getCancelFunc = function () {
         behaviour,
         cancelExecutingBehaviour,
         behaviourQueue,
-        executingBehaviourQueue
+        executingBehaviours
     ] = arguments;
     return function (ignoreSetComplete, cancellingReason) {
 
@@ -20,21 +22,49 @@ var getCancelFunc = function () {
                     queueBehaviour,
                     cancelExecutingBehaviour,
                     behaviourQueue,
-                    executingBehaviourQueue
+                    executingBehaviours
                 ])();
             }
         });
-        if (executingBehaviourQueue.indexOf(behaviour) > -1) {
+        if (executingBehaviours.indexOf(behaviour) > -1) {
 
-            behaviour.state.serviceOperations = [];
-            behaviour.state.modelOperations = [];
-            behaviour.state.businessOperations = [];
+            var state = behaviour.state;
+            var dump = JSON.stringify({
+                operations: [
+                    ...state.serviceOperations,
+                    ...state.modelOperations,
+                    ...state.businessOperations
+                ]
+            });
+            state.serviceOperations = [];
+            state.modelOperations = [];
+            state.businessOperations = [];
             if (cancellingReason) {
 
-                behaviour.state.error = new Error(cancellingReason);
+                state.error = new Error(cancellingReason);
             }
             var cancelling = typeof cancelExecutingBehaviour === "function";
             if (cancelling) cancelExecutingBehaviour(behaviour);
+            if (typeof state.next === "function") {
+
+                if (!behaviour.timeout) behaviour.timeout = 60;
+                setTimeout(function () {
+
+                    if (executingBehaviours.indexOf(behaviour) === -1) {
+
+                        return;
+                    }
+                    var name = behaviour.name || "";
+                    debug("Behaviour " + name + " hangs: " + dump);
+                    if (typeof state.next === "function") {
+
+                        state.next();
+                        state.cancelled = true;
+                        return;
+                    }
+                    debug("Behaviour " + name + " failed to cancel!");
+                }, behaviour.timeout * 1000);
+            }
         } else if (behaviourQueue.indexOf(behaviour) > -1) {
 
             self.dequeue(...[
@@ -98,7 +128,7 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
 
     var self = this;
     var behaviourQueue = [];
-    var executingBehaviourQueue = [];
+    var executingBehaviours = [];
     self.length = () => behaviourQueue.length;
     self.cancelAll = function (cancelExecutingBehaviour) {
 
@@ -108,7 +138,7 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
                 behaviourQueue[i],
                 cancelExecutingBehaviour,
                 behaviourQueue,
-                executingBehaviourQueue
+                executingBehaviours
             ])();
         }
     };
@@ -122,8 +152,8 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
         var index = behaviourQueue.indexOf(currentBehaviour);
         if (index > -1 && index !== behaviourQueue.length - 1) {
 
-            index = executingBehaviourQueue.indexOf(currentBehaviour);
-            if (index > -1) executingBehaviourQueue.splice(index, 1);
+            index = executingBehaviours.indexOf(currentBehaviour);
+            if (index > -1) executingBehaviours.splice(index, 1);
             return true;
         }
         return false;
@@ -156,7 +186,7 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
             behaviour,
             cancelExecutingBehaviour,
             behaviourQueue,
-            executingBehaviourQueue
+            executingBehaviours
         ]);
         var index = behaviourQueue.indexOf(behaviour);
         if (behaviour.timeout > 0) {
@@ -207,7 +237,7 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
                     var shouldDequeue = behaviourQueue.indexOf(...[
                         executingBehaviour
                     ]) > -1;
-                    shouldDequeue &= executingBehaviourQueue.indexOf(...[
+                    shouldDequeue &= executingBehaviours.indexOf(...[
                         executingBehaviour
                     ]) === -1;
                     if (shouldDequeue) self.dequeue(...[
@@ -239,12 +269,12 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
         var currentBehaviour = null;
         for (var i = behaviourQueue.length - 1; i >= 0; i--) {
 
-            if (executingBehaviourQueue.indexOf(...[
+            if (executingBehaviours.indexOf(...[
                 behaviourQueue[i]
             ]) === -1) {
 
                 currentBehaviour = behaviourQueue[i];
-                executingBehaviourQueue.push(currentBehaviour);
+                executingBehaviours.push(currentBehaviour);
                 break;
             }
         }
@@ -252,15 +282,15 @@ var BusinessBehaviourQueue = function (setComplete, setError) {
     };
     self.finish = function (currentBehaviour, next) {
 
-        if (executingBehaviourQueue.every(function () {
+        if (executingBehaviours.every(function () {
 
             var [executingBehaviour] = arguments;
             return !executingBehaviour.hasMandatoryBehaviour(...[
                 currentBehaviour
             ]);
         })) next();
-        var index = executingBehaviourQueue.indexOf(currentBehaviour);
-        if (index > -1) executingBehaviourQueue.splice(index, 1);
+        var index = executingBehaviours.indexOf(currentBehaviour);
+        if (index > -1) executingBehaviours.splice(index, 1);
     };
 };
 

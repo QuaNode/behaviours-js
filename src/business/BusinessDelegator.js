@@ -13,14 +13,18 @@ var getFetchCallback = function () {
         operationCallback,
         callback
     ] = arguments;
-    return function (resource, error) {
+    let state = currentBehaviour.state;
+    return state.next = function (resource, error) {
 
-        if (resource) currentBehaviour.state.serviceObjects = [
+        state.next = undefined;
+        delete state.next;
+        if (state.cancelled) return;
+        if (resource) state.serviceObjects = [
             resource.data ||
             resource.id ||
             resource.path
         ];
-        if (error) currentBehaviour.state.error = error;
+        if (error) state.error = error;
         let callingBack = typeof operationCallback === "function";
         if (callingBack) operationCallback({
 
@@ -60,9 +64,12 @@ var getRequestCallback = function () {
         operationCallback,
         callback
     ] = arguments;
-    return function (serviceObjects, error) {
+    let state = currentBehaviour.state;
+    return state.next = function (serviceObjects, error) {
 
-        let state = currentBehaviour.state;
+        state.next = undefined;
+        delete state.next;
+        if (state.cancelled) return;
         if (serviceObjects) {
 
             if (!state.serviceObjects) state.serviceObjects = [];
@@ -93,9 +100,12 @@ var getManipulateCallback = function () {
         operationCallback,
         callback
     ] = arguments;
-    return function (modelObjects, error) {
+    let state = currentBehaviour.state;
+    return state.next = function (modelObjects, error) {
 
-        let state = currentBehaviour.state;
+        state.next = undefined;
+        delete state.next;
+        if (state.cancelled) return;
         if (modelObjects) {
 
             if (!state.modelObjects) state.modelObjects = [];

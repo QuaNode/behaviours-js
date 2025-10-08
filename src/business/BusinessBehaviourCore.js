@@ -286,8 +286,12 @@ var getNext = function () {
         delegateExisted,
         internalDelegate
     ] = arguments;
-    return function () {
+    var state = this.state;
+    return state.next = function () {
 
+        state.next = undefined;
+        delete state.next;
+        if (state.cancelled) return;
         if (delegateExisted && checkIf(...[
             operationKey,
             beginConditions
@@ -327,7 +331,7 @@ var BusinessBehaviourCore = function (options) {
             internalDelegate
         ] = arguments;
         let delegateExisted = !!delegates[serviceOperation];
-        let next = getNext(...[
+        let next = getNext.apply(this, [
             operationDelegateExecutive,
             serviceOperation,
             beginConditions,
@@ -355,7 +359,7 @@ var BusinessBehaviourCore = function (options) {
             internalDelegate
         ] = arguments;
         let delegateExisted = !!delegates[modelOperation];
-        let next = getNext(...[
+        let next = getNext.apply(this, [
             operationDelegateExecutive,
             modelOperation,
             beginConditions,
@@ -383,7 +387,7 @@ var BusinessBehaviourCore = function (options) {
             internalDelegate
         ] = arguments;
         let delegateExisted = !!delegates[businessOperation];
-        let next = getNext(...[
+        let next = getNext.apply(this, [
             operationDelegateExecutive,
             businessOperation,
             beginConditions,

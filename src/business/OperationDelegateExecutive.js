@@ -171,8 +171,16 @@ var OperationDelegateExecutive = function (options) {
 
             that.data.append = append;
         }
-        var serviceContinue = getServiceContinue.apply(that, [internalDelegate]);
-        watch(serviceOperation, that.data, 0, serviceContinue, watchers);
+        var serviceContinue = getServiceContinue.apply(that, [
+            internalDelegate
+        ]);
+        watch(...[
+            serviceOperation,
+            that.data,
+            0,
+            serviceContinue,
+            watchers
+        ]);
     };
     self.executeModelOperation = function () {
 
@@ -185,18 +193,24 @@ var OperationDelegateExecutive = function (options) {
             callback,
             append
         ] = arguments;
+        var getObjectQuery = () => queryOrObjects || that.data.query;
         var lazyQuery = !Array.isArray(queryOrObjects);
         lazyQuery &= typeof that.data.query === "function";
+        if (lazyQuery) getObjectQuery = that.data.query;
+        var getObjectAggregate = () => that.data.aggregate;
         var lazyAggregate = typeof that.data.aggregate === "function";
+        if (lazyAggregate) getObjectAggregate = that.data.aggregate;
+        var getObjectFilter = () => that.data.filter;
         var lazyFilter = typeof that.data.filter === "function";
+        if (lazyFilter) getObjectFilter = that.data.filter;
         if (that.data.objects) {
 
             that.data.wrapper = that.data.objects;
         } else that.data.wrapper = {
 
-            getObjectQuery: lazyQuery ? that.data.query : () => queryOrObjects || that.data.query,
-            getObjectAggregate: lazyAggregate ? that.data.aggregate : () => that.data.aggregate,
-            getObjectFilter: lazyFilter ? that.data.filter : () => that.data.filter
+            getObjectQuery,
+            getObjectAggregate,
+            getObjectFilter
         };
         if (entity) {
 
@@ -213,8 +227,16 @@ var OperationDelegateExecutive = function (options) {
 
             that.data.append = append;
         }
-        var modelContinue = getModelContinue.apply(that, [internalDelegate]);
-        watch(modelOperation, that.data, 0, modelContinue, watchers);
+        var modelContinue = getModelContinue.apply(that, [
+            internalDelegate
+        ]);
+        watch(...[
+            modelOperation,
+            that.data,
+            0,
+            modelContinue,
+            watchers
+        ]);
     };
     self.executeServiceMappingOperation = function () {
 
@@ -228,7 +250,9 @@ var OperationDelegateExecutive = function (options) {
 
             that.data.callback = callback;
         }
-        var serviceMappingContinue = getServiceMappingContinue.apply(that, [internalDelegate]);
+        var serviceMappingContinue = getServiceMappingContinue.apply(that, [
+            internalDelegate
+        ]);
         watch(...[
             businessOperation,
             that.data,
@@ -254,7 +278,9 @@ var OperationDelegateExecutive = function (options) {
 
             that.data.callback = callback;
         }
-        var modelMappingContinue = getModelMappingContinue.apply(that, [internalDelegate]);
+        var modelMappingContinue = getModelMappingContinue.apply(that, [
+            internalDelegate
+        ]);
         watch(...[
             businessOperation,
             that.data,
@@ -275,7 +301,9 @@ var OperationDelegateExecutive = function (options) {
 
             that.data.error = error;
         }
-        var errorHandlingContinue = getErrorHandlingContinue.apply(that, [internalDelegate]);
+        var errorHandlingContinue = getErrorHandlingContinue.apply(that, [
+            internalDelegate
+        ]);
         watch(...[
             businessOperation,
             that.data,
